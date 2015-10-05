@@ -3,7 +3,7 @@ cat /var/lib/misc/dnsmasq.leases
 
 command to make ssh with Pi
 ssh pi@10.42.0.60
-
+senha: 1234
 command to transfer any file to Pi (do not forget the tilde)
 scp exemple.py pi@10.42.0.60:~
 Template -> scp /path/to/file pi@<IP>:~
