@@ -1,4 +1,4 @@
-#include <msp430g2231.h>
+#include <msp430.h>
  
 #define LED1_MASK       0x01
 #define LED2_MASK       0x40
