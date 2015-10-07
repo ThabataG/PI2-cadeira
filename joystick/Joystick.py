@@ -2,12 +2,8 @@
 
 class Joystick(object):
 
-	def __init__(self,pinX,pinY):
-		self.pinX = pinX
-		self.pinY = pinY
+	def __init__(self):
+		return None
 
-	def setPinX(self,pinX):
-		self.pinX = pinX
-
-	def setPinY(self,pinY):
-		self.pinY = pinY
+	def receiveMsg(self):
+		return None
