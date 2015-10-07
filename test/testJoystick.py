@@ -1,3 +1,4 @@
+# usr/bin/bash -tt
 import sys,os,inspect
 
 cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0],"../joystick")))
@@ -11,18 +12,31 @@ from mock import patch
 from Joystick import *
 
 class testJoystick(unittest.TestCase):
-
-
-	def testInit(self):
-		joy = Joystick()
-		self.assertNotEqual(joy,None)
-
-	@patch.object(Joystick, 'receiveMsg')
-	def testMockReceiveMsg(self,mock_output):
-            mock_output.return_value=['00','88','ff']
-            joy = Joystick()
-            receivedMsg = joy.receiveMsg()
-            self.assertEqual(receivedMsg,['00','88','ff'])
+    def testInit(self):
+        joy = Joystick()
+        self.assertNotEqual(joy,None)
+    @patch.object(Joystick, 'receiveMsg')
+    def testMockReceiveMsg(self,mock_output):
+        mock_output.return_value=['00','88','ff']
+        joy = Joystick()
+        receivedMsg = joy.receiveMsg()
+        self.assertEqual(receivedMsg,['00','88','ff'])
+#    def testReceiveMsgFromMSPJoystick(self):
+#        joy = Joystick()
+#        msgFromMSP = joy.receiveMsg()
+#using scale to engines: 1 to 10 => Foward
+#                       -10 to -1 => Backward
+#                        0 => Stop
+    @patch.object(Joystick, 'receiveMsg')
+    def testTranslateMsgFromMSP(self,mock_output):
+        mock_output.return_value=['00','88','ff']
+        joy = Joystick()
+        receivedMsg = joy.receiveMsg()
+        command = joy.translateFowardCommand(receivedMsg)
+        levelForce = 5
+        levelEngine1 = levelForce
+        levelEngine2 = levelForce
+        self.assertEqual(command,(levelEngine1,levelEngine2))
 
 if __name__ == '__main__':
 	unittest.main()
