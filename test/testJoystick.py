@@ -14,28 +14,15 @@ class testJoystick(unittest.TestCase):
 
 
 	def testInit(self):
-		joy = Joystick(10,11)
+		joy = Joystick()
 		self.assertNotEqual(joy,None)
 
-#	@patch.object(Joystick,pinX='f',pinY='8')
-	def testTurnRight(self):
-		joy = Joystick(10,11)
-		joy.setPinX('f')
-		joy.setPinY('8')
-#		mock_output.
-		self.assertEqual(joy.pinX,'f')
-		self.assertEqual(joy.pinY,'8')
-
-	def testTurnLeft(self):
-		joy = Joystick(10,11)
-		joy.setPinX('0')
-		joy.setPinY('8')
-		self.assertEqual(joy.pinX,'0')
-		self.assertEqual(joy.pinY,'8')
-
-
-#	@patch(Joystick,pinX,pinY)
-#	def testRight(self,mock):
+	@patch.object(Joystick, 'receiveMsg')
+	def testMockReceiveMsg(self,mock_output):
+            mock_output.return_value=['00','88','ff']
+            joy = Joystick()
+            receivedMsg = joy.receiveMsg()
+            self.assertEqual(receivedMsg,['00','88','ff'])
 
 if __name__ == '__main__':
 	unittest.main()
