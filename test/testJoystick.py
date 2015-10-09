@@ -17,26 +17,38 @@ class testJoystick(unittest.TestCase):
         self.assertNotEqual(joy,None)
     @patch.object(Joystick, 'receiveMsg')
     def testMockReceiveMsg(self,mock_output):
-        mock_output.return_value=['00','88','ff']
+        mock_output.return_value="255 255\n"
         joy = Joystick()
         receivedMsg = joy.receiveMsg()
-        self.assertEqual(receivedMsg,['00','88','ff'])
-#    def testReceiveMsgFromMSPJoystick(self):
-#        joy = Joystick()
-#        msgFromMSP = joy.receiveMsg()
+        self.assertEqual(receivedMsg,"255 255\n")
+
 #using scale to engines: 1 to 10 => Foward
 #                       -10 to -1 => Backward
 #                        0 => Stop
     @patch.object(Joystick, 'receiveMsg')
-    def testTranslateMsgFromMSP(self,mock_output):
-        mock_output.return_value=['00','88','ff']
+    def testTranslateMsgFromMSPToCommandXAndY(self,mock_output):
+        mock_output.return_value="255 255\n"
         joy = Joystick()
         receivedMsg = joy.receiveMsg()
-        command = joy.translateFowardCommand(receivedMsg)
+        command = joy.translateCommandFromMSP(receivedMsg)
+        commandX = "255"
+        commandY = "255"
+        self.assertEqual(command,[commandX,commandY])
+
+    @patch.object(Joystick,'receiveMsg')
+    def testSendMessageToMSPEngines(self,mock_output):
+        mock_output.return_value="255 255\n"
+        joy = Joystick()
+        receivedMsg = joy.receiveMsg()
+        command = joy.translateCommandFromMSP(receivedMsg)
+        success = joy.sendMessageToMSP(command)
+
+        self.assertEqual(success,True)
+"""    def test(self):
         levelForce = 5
         levelEngine1 = levelForce
         levelEngine2 = levelForce
-        self.assertEqual(command,(levelEngine1,levelEngine2))
+"""
 
 if __name__ == '__main__':
 	unittest.main()
