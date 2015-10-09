@@ -1,3 +1,4 @@
+# usr/bin/bash -tt
 import sys,os,inspect
 
 cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0],"../joystick")))
@@ -11,31 +12,43 @@ from mock import patch
 from Joystick import *
 
 class testJoystick(unittest.TestCase):
+    def testInit(self):
+        joy = Joystick()
+        self.assertNotEqual(joy,None)
+    @patch.object(Joystick, 'receiveMsg')
+    def testMockReceiveMsg(self,mock_output):
+        mock_output.return_value="255 255\n"
+        joy = Joystick()
+        receivedMsg = joy.receiveMsg()
+        self.assertEqual(receivedMsg,"255 255\n")
 
+#using scale to engines: 1 to 10 => Foward
+#                       -10 to -1 => Backward
+#                        0 => Stop
+    @patch.object(Joystick, 'receiveMsg')
+    def testTranslateMsgFromMSPToCommandXAndY(self,mock_output):
+        mock_output.return_value="255 255\n"
+        joy = Joystick()
+        receivedMsg = joy.receiveMsg()
+        command = joy.translateCommandFromMSP(receivedMsg)
+        commandX = "255"
+        commandY = "255"
+        self.assertEqual(command,[commandX,commandY])
 
-	def testInit(self):
-		joy = Joystick(10,11)
-		self.assertNotEqual(joy,None)
+    @patch.object(Joystick,'receiveMsg')
+    def testSendMessageToMSPEngines(self,mock_output):
+        mock_output.return_value="255 255\n"
+        joy = Joystick()
+        receivedMsg = joy.receiveMsg()
+        command = joy.translateCommandFromMSP(receivedMsg)
+        success = joy.sendMessageToMSP(command)
 
-#	@patch.object(Joystick,pinX='f',pinY='8')
-	def testTurnRight(self):
-		joy = Joystick(10,11)
-		joy.setPinX('f')
-		joy.setPinY('8')
-#		mock_output.
-		self.assertEqual(joy.pinX,'f')
-		self.assertEqual(joy.pinY,'8')
-
-	def testTurnLeft(self):
-		joy = Joystick(10,11)
-		joy.setPinX('0')
-		joy.setPinY('8')
-		self.assertEqual(joy.pinX,'0')
-		self.assertEqual(joy.pinY,'8')
-
-
-#	@patch(Joystick,pinX,pinY)
-#	def testRight(self,mock):
+        self.assertEqual(success,True)
+"""    def test(self):
+        levelForce = 5
+        levelEngine1 = levelForce
+        levelEngine2 = levelForce
+"""
 
 if __name__ == '__main__':
 	unittest.main()
