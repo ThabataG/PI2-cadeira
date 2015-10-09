@@ -8,3 +8,18 @@ command to transfer any file to Pi (do not forget the tilde)
 scp exemple.py pi@10.42.0.60:~
 Template -> scp /path/to/file pi@<IP>:~
 
+~~~~~~~~~~~~~~~~~~~
+Felipe:
+Não é preciso configurar o servidor ssh na rasp, ele configura sozinho com ip dinâmico.
+Para compartilhar a internet, basta ir até connections:edit_connections:wired_connection:ipv4:method e selecionar 'shared w other computers'
+Para identificar o gateway do servidor:
+$ ifconfig
+Para identificar o ip do servidor, basta instalar o nmap e:
+$ nmap <ip_first_3bytes>/24
+Depois basta se conectar a rasp:
+$ ssh <user>@<ip>
+Confirme  conexão e digite a senha.
+Para sair:
+$ exit
+Para desligar a rasp e sair:
+$ sudo shutdown -h now
