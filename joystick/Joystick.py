@@ -40,7 +40,9 @@ class Joystick(object):
                 numOfLines = 0
                 while True:
                     response = serialObject.readline()
-                    print("read data: " + response)
+                    print(response)
+                    for char in response:
+                        print(char)
                     numOfLines = numOfLines + 1
                     if (numOfLines >= 5):
                         break
@@ -64,5 +66,3 @@ class Joystick(object):
 
     def sendMessageToMSP(self,command):
         return False
-
-if
