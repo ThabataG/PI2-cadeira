@@ -1,0 +1,17 @@
+Install libraries
+$ sudo apt-get install msp430-libc mspdebug msp430mcu binutils-msp430 gcc-msp430 gdb-msp430
+
+Compile the MSP source file
+$ msp430-gcc -Os -mmcu=msp430g2553 prog.c -o prog.elf
+
+Write the code on LaunchPad
+$ sudo mspdebug rf2500
+
+Program the uC
+$ prog prog.elf
+
+$ Run the application
+$ run
+
+Reference
+http://sergioprado.org/trabalhando-com-o-msp430-no-linux/

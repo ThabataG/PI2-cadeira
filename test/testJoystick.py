@@ -1,21 +1,41 @@
+import sys,os,inspect
+
+cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0],"../joystick")))
+if cmd_subfolder not in sys.path:
+    sys.path.insert(0, cmd_subfolder)
+print (cmd_subfolder)
+
 import unittest
-import models.Joystick
-#from unittest.mock import patch, call
+from mock import patch
 
-#@patch("RPi.GPIO.output",autospec=True)
-class TestJoystick(unittest.TestCase):
-#    in1Pin = 11
-#    in2Pin = 13
+from Joystick import *
 
-#    GPIO.setmode(GPIO.BOARD)
-#    GPIO.setup(in1Pin,GPIO.IN)
-#    GPIO.setup(in2Pin,GPIO.IN)
+class testJoystick(unittest.TestCase):
 
-    def testInit(self):
-        joy = Joystick(in1Pin,in2Pin)
-        self.assertNotEqual(joy,nil)
-#        mock_output.assert_has_calls([call(self.in1Pin, False),call(self.in2Pin, False)],any_order=True)
 
-#if __name__ == '__main__':
+	def testInit(self):
+		joy = Joystick(10,11)
+		self.assertNotEqual(joy,None)
 
-unittest.main()
+#	@patch.object(Joystick,pinX='f',pinY='8')
+	def testTurnRight(self):
+		joy = Joystick(10,11)
+		joy.setPinX('f')
+		joy.setPinY('8')
+#		mock_output.
+		self.assertEqual(joy.pinX,'f')
+		self.assertEqual(joy.pinY,'8')
+
+	def testTurnLeft(self):
+		joy = Joystick(10,11)
+		joy.setPinX('0')
+		joy.setPinY('8')
+		self.assertEqual(joy.pinX,'0')
+		self.assertEqual(joy.pinY,'8')
+
+
+#	@patch(Joystick,pinX,pinY)
+#	def testRight(self,mock):
+
+if __name__ == '__main__':
+	unittest.main()
