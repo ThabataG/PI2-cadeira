@@ -5,5 +5,10 @@ class Joystick(object):
     def receiveMsg(self):
         return None
 
-    def translateFowardCommand(self,message):
-        return None,None
+    def translateCommandFromMSP(self,message):
+        message = message.rstrip('\n')
+        command = message.split(" ",1)
+        return command
+
+    def sendMessageToMSP(self,command):
+        return False
