@@ -1,13 +1,14 @@
-
-
 class Joystick(object):
+    def __init__(self):
+        return None
 
-	def __init__(self,pinX,pinY):
-		self.pinX = pinX
-		self.pinY = pinY
+    def receiveMsg(self):
+        return None
 
-	def setPinX(self,pinX):
-		self.pinX = pinX
+    def translateCommandFromMSP(self,message):
+        message = message.rstrip('\n')
+        command = message.split(" ",1)
+        return command
 
-	def setPinY(self,pinY):
-		self.pinY = pinY
+    def sendMessageToMSP(self,command):
+        return False
