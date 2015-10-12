@@ -17,22 +17,22 @@ class testJoystick(unittest.TestCase):
         self.assertNotEqual(joy,None)
     @patch.object(Joystick, 'receiveMsg')
     def testMockReceiveMsg(self,mock_output):
-        mock_output.return_value="255 255\n"
+        mock_output.return_value="ab\n"
         joy = Joystick()
         receivedMsg = joy.receiveMsg()
-        self.assertEqual(receivedMsg,"255 255\n")
+        self.assertEqual(receivedMsg,"ab\n")
 
 #using scale to engines: 1 to 10 => Foward
 #                       -10 to -1 => Backward
 #                        0 => Stop
     @patch.object(Joystick, 'receiveMsg')
     def testTranslateMsgFromMSPToCommandXAndY(self,mock_output):
-        mock_output.return_value="255 255\n"
+        mock_output.return_value="ab\n"
         joy = Joystick()
         receivedMsg = joy.receiveMsg()
         command = joy.translateCommandFromMSP(receivedMsg)
-        commandX = "255"
-        commandY = "255"
+        commandX = 97
+        commandY = 98
         self.assertEqual(command,[commandX,commandY])
 
     @patch.object(Joystick,'receiveMsg')
