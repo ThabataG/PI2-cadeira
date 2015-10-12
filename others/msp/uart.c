@@ -48,6 +48,9 @@ void Port1Int(void)
         UCA0TXBUF = 'a'; // TX next character
 
         while (!(IFG2 & UCA0TXIFG));	// USCI_A0 TX buffer ready?
+        UCA0TXBUF = 'b'; // TX next character
+
+        while (!(IFG2 & UCA0TXIFG));	// USCI_A0 TX buffer ready?
         UCA0TXBUF = '\n'; // TX next character
 
         for(i =0; i< 10000; i++);
