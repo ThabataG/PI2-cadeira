@@ -15,6 +15,7 @@ class testJoystick(unittest.TestCase):
     def testInit(self):
         joy = Joystick()
         self.assertNotEqual(joy,None)
+        
     @patch.object(Joystick, 'receiveMsg')
     def testMockReceiveMsg(self,mock_output):
         mock_output.return_value="ab\n"
