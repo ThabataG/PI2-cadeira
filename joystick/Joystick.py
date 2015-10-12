@@ -11,7 +11,7 @@ class Joystick(object):
 
     def setupInterruption(self):
         initSerialObject()
-        GPIO.add_event_detect(pinNumber, GPIO.RISING, callback=readMsg, bouncetime=300)
+        GPIO.add_event_detect(pinNumber, GPIO.FALLING, callback=readMsg, bouncetime=300)
 
     def translateCommandFromMSP(self,message):
         message = message.rstrip('\n')
