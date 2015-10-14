@@ -1,7 +1,7 @@
 from serialObject import *
 
 pinNumber = 11
-serialObject = None
+serialObjectJoystick = None
 
 class Joystick(object):
     def __init__(self):
@@ -10,33 +10,38 @@ class Joystick(object):
         self.setupInterruption()
 
     def setupInterruption(self):
-        global serialObject
-        serialObject = SerialObject.initSerialObject()
+        global serialObjectJoystick
+        serialObjectJoystick = SerialObject.initSerialObject()
         GPIO.add_event_detect(pinNumber, GPIO.FALLING, callback=readMsg, bouncetime=300)
-        print("Setup interruption")
 
     def translateCommandFromMSP(self,message):
         message = message.rstrip('\n')
-        command = message.split(" ",1)
-        return command
+        commands = []
+        for char in message:
+            print(char)
+            commands.append(ord(char))
+#        command = message.split(" ",1)
+        return commands
 
     def sendMessageToMSP(self,command):
         return False
 
+    def readMsg():
+        return None
+
 def readMsg(channel):
-    print(channel)
-    global serialObject #to set serial object
-    serialObject = SerialObject.connectWithSerialPort(serialObject)
-    if serialObject.isOpen():
+    global serialObjectJoystick #to set serial object
+    serialObjectJoystick = SerialObject.connectWithSerialPort(serialObjectJoystick)
+    if serialObjectJoystick.isOpen():
         try:
-            serialObject.flushInput() # Flush input buffer, discarding all its contents
-            serialObject.flushOutput() # Flush output buffer, aborting current output and discard all that is in buffer
+            serialObjectJoystick.flushInput() # Flush input buffer, discarding all its contents
+            serialObjectJoystick.flushOutput() # Flush output buffer, aborting current output and discard all that is in buffer
     		# Write data
     		#s.write("AT+CSQ")
     		#print("write data: AT+CSQ")
     		#time.sleep(0.5)  				# Give the serial port sometime to receive the data
             try:
-                response = serialObject.readline()
+                response = serialObjectJoystick.readline()
 #                for char in response:
 #                    print(char)
                 print("Received Msg")
@@ -44,7 +49,7 @@ def readMsg(channel):
             except KeyboardInterrupt:
                 GPIO.cleanup()
 
-            serialObject.close()
+            serialObjectJoystick.close()
         except Exception as e:
             print("error communicating...: " + str(e))
     else:
