@@ -2,6 +2,7 @@ from serialObject import *
 
 pinNumber = 11
 serialObjectJoystick = None
+serialObjectEngine = None
 
 class Joystick(object):
     def __init__(self):
@@ -11,7 +12,8 @@ class Joystick(object):
 
     def setupInterruption(self):
         global serialObjectJoystick
-        serialObjectJoystick = SerialObject.initSerialObject()
+        usbPort = "/dev/ttyACM0"
+        serialObjectJoystick = SerialObject.initSerialObject(usbPort)
         GPIO.add_event_detect(pinNumber, GPIO.FALLING, callback=readMsg, bouncetime=300)
 
     def translateCommandFromMSP(self,message):
@@ -23,8 +25,15 @@ class Joystick(object):
 #        command = message.split(" ",1)
         return commands
 
+    def setupWriteSerial(self):
+        global serialObjectEngine
+        usbPort = "/dev/ttyACM1"
+        serialObjectEngine = SerialObject.initSerialObject(usbPort)
+        serialObjectEngine = SerialObject.connectWithSerialPort(serialObjectEngine)
+
     def sendMessageToMSP(self,command):
-        return False
+        self.setupWriteSerial()
+        SerialObject.writeWithSerial(serialObjectEngine,command)
 
     def readMsg():
         return None
