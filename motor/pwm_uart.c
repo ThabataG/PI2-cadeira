@@ -32,9 +32,7 @@ int main() {
 	uart_config();
 	port1_config();
 	
-	while(1) {
-		_BIS_SR(LPM0_bits+GIE);
-	}
+	_BIS_SR(LPM0_bits+GIE);
 	
 	return 0;
 }
@@ -42,8 +40,7 @@ int main() {
 // UART RX interruption controller
 void USCI0RXInt(void) __attribute__((interrupt(USCIAB0RX_VECTOR)));
 void USCI0RXInt(void) {
-	TACCR1 = CYCLE * UCA0RXBUF / 255;
-	LPM0_EXIT;
+	TACCR1 = (CYCLE * UCA0RXBUF) / 255;
 }
 
 // Initialize TimerA
@@ -71,13 +68,16 @@ void uart_config() {
 	UCA0BR1 = 0;
 	// ?
 	UCA0MCTL = UCBRF_8 + UCOS16;
+	// Enable interruption via UART RX
+	IE2 |= UCA0RXIE;
 }
 
 // Initialize Port1
 void port1_config() {
 	// Initial setup
 	P1DIR = RLED + GLED;
-	P1SEL2 = P1SEL = RXPIN + TXPIN;
+	P1SEL = GLED + RXPIN + TXPIN;
+	P1SEL2 = RXPIN + TXPIN;
 	// Initial state of leds
 	P1OUT = RLED;
 }
