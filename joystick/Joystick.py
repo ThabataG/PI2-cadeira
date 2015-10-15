@@ -2,7 +2,8 @@ from serialObject import *
 
 pinNumber = 11
 serialObjectJoystick = None
-serialObjectEngine = None
+serialObjectEngineLeft = None
+serialObjectEngineRight = None
 
 class Joystick(object):
     def __init__(self):
@@ -26,15 +27,24 @@ class Joystick(object):
         return commands
 
     def setupWriteSerial(self):
-        global serialObjectEngine
+        global serialObjectEngineLeft
         usbPort = "/dev/ttyACM1"
-        serialObjectEngine = SerialObject.initSerialObject(usbPort)
-        serialObjectEngine = SerialObject.connectWithSerialPort(serialObjectEngine)
+        serialObjectEngineLeft = SerialObject.initSerialObject(usbPort)
+        serialObjectEngineLeft = SerialObject.connectWithSerialPort(serialObjectEngineLeft)
+
+        global serialObjectEngineRight
+        usbPort = "/dev/ttyACM2"
+        serialObjectEngineRight = SerialObject.initSerialObject(usbPort)
+        serialObjectEngineRight = SerialObject.connectWithSerialPort(serialObjectEngineRight)
 
     def sendMessageToMSP(self,command):
         self.setupWriteSerial()
-        SerialObject.writeWithSerial(serialObjectEngine,command)
+        commandToMSPLeftEngine = command[0]
+        commandToMSPRightEngine = command[1]
 
+        SerialObject.writeWithSerial(serialObjectEngineLeft,commandToMSPLeftEngine)
+        serialObject.writeWithSerial(serialObjectEngineRight,commandToMSPRightEngine)
+        
     def readMsg():
         return None
 
