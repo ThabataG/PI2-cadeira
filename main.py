@@ -1,0 +1,15 @@
+import sys,os,inspect
+
+cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0],"joystick")))
+if cmd_subfolder not in sys.path:
+    sys.path.insert(0, cmd_subfolder)
+
+from Joystick import *
+
+if __name__ == "__main__":
+    joy = Joystick()
+
+    while True:
+        messageFromJoystick = joy.getMessageFromJoystick()
+        command = joy.translateCommandFromMSP(messageFromJoystick)
+        joy.sendMessageToEnginesMSPs(command)
