@@ -4,12 +4,18 @@ pinNumber = 11
 serialObjectJoystick = None
 serialObjectEngineLeft = None
 serialObjectEngineRight = None
+messageFromJoystick = None
 
 class Joystick(object):
+
     def __init__(self):
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(pinNumber,GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
         self.setupInterruption()
+        self.setupWriteSerial()
+
+    def getMessageFromJoystick(self):
+        return messageFromJoystick
 
     def setupInterruption(self):
         global serialObjectJoystick
@@ -30,21 +36,27 @@ class Joystick(object):
         global serialObjectEngineLeft
         usbPort = "/dev/ttyACM1"
         serialObjectEngineLeft = SerialObject.initSerialObject(usbPort)
-        serialObjectEngineLeft = SerialObject.connectWithSerialPort(serialObjectEngineLeft)
 
         global serialObjectEngineRight
         usbPort = "/dev/ttyACM2"
         serialObjectEngineRight = SerialObject.initSerialObject(usbPort)
+
+    def openConnectionToWrite(self):
+        global serialObjectEngineLeft
+        serialObjectEngineLeft = SerialObject.connectWithSerialPort(serialObjectEngineLeft)
+
+        global serialObjectEngineRight
         serialObjectEngineRight = SerialObject.connectWithSerialPort(serialObjectEngineRight)
 
-    def sendMessageToMSP(self,command):
-        self.setupWriteSerial()
+    def sendMessageToEnginesMSPs(self,command):
+        self.openConnectionToWrite()
+        
         commandToMSPLeftEngine = command[0]
         commandToMSPRightEngine = command[1]
 
         SerialObject.writeWithSerial(serialObjectEngineLeft,commandToMSPLeftEngine)
         serialObject.writeWithSerial(serialObjectEngineRight,commandToMSPRightEngine)
-        
+
     def readMsg():
         return None
 
@@ -64,7 +76,7 @@ def readMsg(channel):
 #                for char in response:
 #                    print(char)
                 print("Received Msg")
-                print(response)
+                messageFromJoystick = response
             except KeyboardInterrupt:
                 GPIO.cleanup()
 
