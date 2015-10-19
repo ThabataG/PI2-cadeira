@@ -33,7 +33,7 @@ if s.isOpen():
 		#print("write data: AT+CSQ")
 		#time.sleep(0.5)  				# Give the serial port sometime to receive the data
 		print("start writing...")
-		loops = 2
+		loops = 20
 		while True:
 			for i in range(0,255):
 				for j in range(loops):
