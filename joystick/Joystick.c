@@ -15,13 +15,17 @@
 #define BTN BIT3
 #define RXPIN BIT1
 #define TXPIN BIT2
-#define AD_IN (BIT5)
+#define AD_IN (BIT4+BIT5)
 #define AD_CH INCH_5
+
+// Global variables
+int samples[2];
 
 // Prototypes
 void ad_config();
 void uart_config();
 void port1_config();
+void send_data();
 
 // Main
 int main() {
@@ -34,8 +38,12 @@ int main() {
 	port1_config();
 	
 	while(1) {
-		ADC10CTL0 |= ADC10SC;
+		// Set block start address
+		ADC10SA = (int)&samples[0];
+		// Start conversion
+		ADC10CTL0 |= ADC10SC + ENC;
 		_BIS_SR(LPM0_bits+GIE);
+		send_data();
 	}
 	
 	return 0;
@@ -44,23 +52,37 @@ int main() {
 // ADC10 interruption controller
 void ADCInt(void) __attribute__((interrupt(ADC10_VECTOR)));
 void ADCInt(void) {
-	ADC10CTL0 &= ~ADC10SC;
+	ADC10CTL0 &= ~(ADC10SC+ENC);
+	LPM0_EXIT;
+}
+
+// Send ADC values via UART
+void send_data() {
+	volatile char x = 0xFF & (samples[1] >> 2);
+	volatile char y = 0xFF & (samples[0] >> 2);
 	P1OUT ^= GLED + RLED;
 	while (!(IFG2 & UCA0TXIFG));
-	UCA0TXBUF = 0xFF & (ADC10MEM >> 2);
+	UCA0TXBUF = x;
+	while (!(IFG2 & UCA0TXIFG));
+	UCA0TXBUF = y;
 	while (!(IFG2 & UCA0TXIFG));
 	UCA0TXBUF = '\n';
-	LPM0_EXIT;
 }
 
 // Initialize ADC10
 void ad_config() {
-	// Set analog input
-	ADC10AE0 = AD_IN;
-	//          BIT0+1   /1           SMCLK         single-ch-repeat-conversion
-	ADC10CTL1 = AD_CH +  ADC10DIV_0 + ADC10SSEL_3 + CONSEQ_2;
-	//          Vcc/GND  s&h=4clks    I.E.      ADC ON    Enable Conversion
-	ADC10CTL0 = SREF_0 + ADC10SHT_0 + ADC10IE + ADC10ON + ENC;
+	// Turn off ADC10 for setting it up
+	ADC10CTL0 &= ~ENC;
+	//          Vcc/GND  s&h=16clks   I.E.      ADC ON    Automatically enable next conversion
+	ADC10CTL0 = SREF_0 + ADC10SHT_2 + ADC10IE + ADC10ON + MSC;
+	//          INCH     /1           SMCLK         repeat-seq-of-conversion
+	ADC10CTL1 = AD_CH +  ADC10DIV_0 + ADC10SSEL_3 + CONSEQ_3;
+	// Two conversions
+	ADC10DTC1 = 8;
+	// Set analog inputs
+	ADC10AE0 |= AD_IN;
+	// Turn on ADC10
+	ADC10CTL0 |= ENC;
 }
 
 // Initialize UART
