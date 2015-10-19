@@ -39,8 +39,8 @@ class testJoystick(unittest.TestCase):
         mock_output.return_value="ab\n"
         receivedMsg = joy.readMsg()
         command = joy.translateCommandFromMSP(receivedMsg)
-        commandX = 97
-        commandY = 98
+        commandX = 'a'
+        commandY = 'b'
         self.assertEqual(command,[commandX,commandY])
 
     @patch.object(Joystick,'readMsg')
@@ -48,7 +48,7 @@ class testJoystick(unittest.TestCase):
         mock_output.return_value="ab\n"
         receivedMsg = joy.readMsg()
         command = joy.translateCommandFromMSP(receivedMsg)
-        success = joy.sendMessageToMSP(command)
+        success = joy.sendMessageToEnginesMSPs(command)
 
         self.assertEqual(success,True)
 
