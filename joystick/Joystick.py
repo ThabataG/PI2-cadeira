@@ -23,12 +23,16 @@ class Joystick(object):
         GPIO.add_event_detect(pinNumber, GPIO.FALLING, callback=readMsg, bouncetime=300)
 
     def translateCommandFromMSP(self,message):
-        message = message.rstrip('\n')
-        commands = []
-        for char in message:
-            commands.append(char)
-#        command = message.split(" ",1)
-        return commands
+        haveNewLine = message.find(b'\n')
+        if haveNewLine != -1:
+            message = message.rstrip(b'\n')
+            commands = []
+            for char in message:
+                commands.append(char)
+        #        command = message.split(" ",1)
+            return commands
+        return ""
+
 
     def setupWriteSerial(self):
         global serialObjectEngine
@@ -53,6 +57,7 @@ class Joystick(object):
 
 def readMsg(channel):
     global serialObjectJoystick #to set serial object
+    global messageFromJoystick
     serialObjectJoystick = SerialObject.connectWithSerialPort(serialObjectJoystick)
     if serialObjectJoystick.isOpen():
         try:
@@ -66,7 +71,7 @@ def readMsg(channel):
                 response = serialObjectJoystick.readline()
 #                for char in response:
 #                    print(char)
-                print("Received Msg")
+#                print("Received Msg")
                 messageFromJoystick = response
             except KeyboardInterrupt:
                 GPIO.cleanup()
