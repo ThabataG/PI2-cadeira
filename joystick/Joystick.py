@@ -2,35 +2,62 @@ from serialObject import *
 
 pinNumber = 11
 serialObjectJoystick = None
+serialObjectEngine = None
+messageFromJoystick = None
 
 class Joystick(object):
+
     def __init__(self):
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(pinNumber,GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
         self.setupInterruption()
+        self.setupWriteSerial()
+
+    def getMessageFromJoystick(self):
+        return messageFromJoystick
 
     def setupInterruption(self):
         global serialObjectJoystick
-        serialObjectJoystick = SerialObject.initSerialObject()
+        usbPort = "/dev/ttyACM0"
+        serialObjectJoystick = SerialObject.initSerialObject(usbPort)
         GPIO.add_event_detect(pinNumber, GPIO.FALLING, callback=readMsg, bouncetime=300)
 
     def translateCommandFromMSP(self,message):
-        message = message.rstrip('\n')
-        commands = []
-        for char in message:
-            print(char)
-            commands.append(ord(char))
-#        command = message.split(" ",1)
-        return commands
+        haveNewLine = message.find(b'\n')
+        if haveNewLine != -1:
+            message = message.rstrip(b'\n')
+            commands = []
+            for char in message:
+                commands.append(char)
+        #        command = message.split(" ",1)
+            return commands
+        return ""
 
-    def sendMessageToMSP(self,command):
-        return False
+
+    def setupWriteSerial(self):
+        global serialObjectEngine
+        usbPort = "/dev/ttyACM1"
+        serialObjectEngine = SerialObject.initSerialObject(usbPort)
+
+    def openConnectionToWrite(self):
+        global serialObjectEngine
+        serialObjectEngine = SerialObject.connectWithSerialPort(serialObjectEngine)
+
+    def sendMessageToEnginesMSPs(self,command):
+        self.openConnectionToWrite()
+
+        commandToMSPEngine = command
+
+        sucess_sends_comands = SerialObject.writeWithSerial(serialObjectEngine,commandToMSPEngine)
+
+        return sucess_sends_comands
 
     def readMsg():
         return None
 
 def readMsg(channel):
     global serialObjectJoystick #to set serial object
+    global messageFromJoystick
     serialObjectJoystick = SerialObject.connectWithSerialPort(serialObjectJoystick)
     if serialObjectJoystick.isOpen():
         try:
@@ -44,8 +71,8 @@ def readMsg(channel):
                 response = serialObjectJoystick.readline()
 #                for char in response:
 #                    print(char)
-                print("Received Msg")
-                print(response)
+#                print("Received Msg")
+                messageFromJoystick = response
             except KeyboardInterrupt:
                 GPIO.cleanup()
 

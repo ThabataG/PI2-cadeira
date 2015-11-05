@@ -4,10 +4,10 @@ import RPi.GPIO as GPIO
 class SerialObject(object):
 
     @staticmethod
-    def initSerialObject():
+    def initSerialObject(usbPort):
         serialObject = serial.Serial()
 
-        serialObject.port = "/dev/ttyACM0"
+        serialObject.port = usbPort
         serialObject.baudrate = 9600
         serialObject.bytesize = serial.EIGHTBITS 			# Number of bits per bytes
         serialObject.parity = serial.PARITY_NONE 			# Set parity check: no parity
@@ -27,3 +27,17 @@ class SerialObject(object):
         	print("error open serial port: " + str(e))
         	exit()
         return serialObject
+
+    @staticmethod
+    def writeWithSerial(serialObject, command):
+        try:
+            serialObject.flushInput()
+            serialObject.flushOutput()
+            serialObject.write(command[0].encode())
+            serialObject.write(command[1].encode())
+            serialObject.close()
+        except Exception as e:
+            print("Error write in serial port: " + str(e))
+            exit()
+            return False
+        return True
