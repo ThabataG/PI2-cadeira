@@ -35,9 +35,8 @@ if s.isOpen():
 		numOfLines = 0
 		while True:
 			response = s.readline()
-			print("read data: " + response)
-			numOfLines = numOfLines + 1
-			if (numOfLines >= 5):
+			print(response)
+			if response == "a\n":
 				break
 		s.close()
 	except Exception, e1:
