@@ -24,8 +24,6 @@ class Joystick(object):
 
     def translateCommandFromMSP(self,message):
         haveNewLine = message.find(b'\n')
-        print("Message to be translated ")
-        print(message)
         if haveNewLine != -1:
             message = message.rstrip(b'\n')
             commands = []
@@ -48,12 +46,19 @@ class Joystick(object):
 
     def sendMessageToEnginesMSPs(self,command):
         self.openConnectionToWrite()
+        successSendMessage = False
+        if self.verifyIfMessageContainsError(command) == False:
+            successSendMessage = SerialObject.writeWithSerial(serialObjectEngine,command)
 
-        commandToMSPEngine = command
+        serialObjectEngine.serialObject.close()
 
-        sucess_sends_comands = SerialObject.writeWithSerial(serialObjectEngine,commandToMSPEngine)
+        return successSendMessage
 
-        return sucess_sends_comands
+    def verifyIfMessageContainsError(self,receivedMsg):
+        if len(receivedMsg) != 3 :
+            return True
+        else:
+            return False
 
     def readMsg():
         return None
@@ -71,6 +76,7 @@ def readMsg(channel):
     		#print("write data: AT+CSQ")
     		#time.sleep(0.5)  				# Give the serial port sometime to receive the data
             try:
+                response = serialObjectJoystick.readline()
                 response = serialObjectJoystick.readline()
 #                for char in response:
 #                    print(char)
