@@ -36,7 +36,7 @@ int main() {
 	ad_config();
 	uart_config();
 	port1_config();
-	
+
 	while(1) {
 		// Set block start address
 		ADC10SA = (int)&samples[0];
@@ -45,7 +45,7 @@ int main() {
 		_BIS_SR(LPM0_bits+GIE);
 		send_data();
 	}
-	
+
 	return 0;
 }
 
@@ -58,8 +58,8 @@ void ADCInt(void) {
 
 // Send ADC values via UART
 void send_data() {
-	volatile char x = 0xFF & (samples[1] >> 2);
-	volatile char y = 0xFF & (samples[0] >> 2);
+	volatile char x = 0xFF & (samples[0] >> 2);
+	volatile char y = 0xFF & (samples[1] >> 2);
 	P1OUT ^= GLED + RLED;
 	while (!(IFG2 & UCA0TXIFG));
 	UCA0TXBUF = x;
@@ -106,4 +106,3 @@ void port1_config() {
   // Initial state of leds
 	P1OUT = RLED;
 }
-
