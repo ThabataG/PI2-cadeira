@@ -1,26 +1,41 @@
 from serialObject import *
 
-pinNumber = 11
-serialObjectJoystick = None
 serialObjectEngine = None
 messageFromJoystick = None
 
 class Joystick(object):
+    __serialPort = None
 
     def __init__(self):
-        GPIO.setmode(GPIO.BOARD)
-        GPIO.setup(pinNumber,GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
-        self.setupInterruption()
+        self.initSerial()
+        self.startConnection()
+        # TODO: try to clear buffer while buffer not flushed
+        self.flushBuffer()
 #        self.setupWriteSerial()
 
-    def getMessageFromJoystick(self):
-        return messageFromJoystick
-
-    def setupInterruption(self):
-        global serialObjectJoystick
+    def initSerial(self):
         usbPort = "/dev/ttyACM0"
-        serialObjectJoystick = SerialObject.initSerialObject(usbPort)
-        GPIO.add_event_detect(pinNumber, GPIO.FALLING, callback=readMsg, bouncetime=300)
+        self.serialPort = SerialObject.initSerialObject(usbPort)
+
+    def startConnection(self):
+        self.serialPort = SerialObject.connectWithSerialPort(self.serialPort)
+
+    def flushBuffer(self):
+        if self.serialPort.isOpen():
+            try:
+                self.serialPort.flushInput()
+                self.serialPort.flushOutput()
+            except Exception as exception:
+                print("error communicating...: " + str(exception))
+        else:
+        	print("cannot open serial port ")
+
+    def getMessage(self):
+        try:
+            self.serialPort.readline()
+            return self.serialPort.readline()
+        except KeyboardInterrupt:
+            exit()
 
     def translateCommandFromMSP(self,message):
         haveNewLine = message.find(b'\n')
@@ -33,6 +48,8 @@ class Joystick(object):
 #            print("Message translated: " + ''.join(str(e) for e in commands))
             return commands
         return ""
+
+############### TODO NEED TO REFACTOR FROM HERE!!! TODO #########
 
 
     def setupWriteSerial(self):
@@ -63,30 +80,3 @@ class Joystick(object):
     def readMsg():
         return None
 # MSG esta demorando pra chegar: Ou buffer do MSP não está pronto a tempo ou falha de comunicação entre MSP e Rasp
-def readMsg(channel):
-    global serialObjectJoystick #to set serial object
-    global messageFromJoystick
-    serialObjectJoystick = SerialObject.connectWithSerialPort(serialObjectJoystick)
-    if serialObjectJoystick.isOpen():
-        try:
-            serialObjectJoystick.flushInput() # Flush input buffer, discarding all its contents
-            serialObjectJoystick.flushOutput() # Flush output buffer, aborting current output and discard all that is in buffer
-    		# Write data
-    		#s.write("AT+CSQ")
-    		#print("write data: AT+CSQ")
-    		#time.sleep(0.5)  				# Give the serial port sometime to receive the data
-            try:
-                response = serialObjectJoystick.readline()
-                response = serialObjectJoystick.readline()
-#                for char in response:
-#                    print(char)
-#                print("Received Msg")
-                messageFromJoystick = response
-            except KeyboardInterrupt:
-                GPIO.cleanup()
-
-            serialObjectJoystick.close()
-        except Exception as e:
-            print("error communicating...: " + str(e))
-    else:
-    	print("cannot open serial port ")
