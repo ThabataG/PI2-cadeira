@@ -56,7 +56,7 @@ class testJoystick(unittest.TestCase):
         self.assertEqual(success,True)
 
     @patch.object(Joystick,'readMsg')
-    def testTranslateMessageWithMissingValue(self,mock_output):
+    def testReceiveMessageWithMissingValue(self,mock_output):
         #[commandX,Missing commandY,markerCharacter]
         listOfValues = [200,10]
         mock_output.return_value=bytes(listOfValues)
