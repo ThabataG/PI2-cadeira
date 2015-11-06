@@ -46,6 +46,7 @@ class testJoystick(unittest.TestCase):
 
     @patch.object(Joystick,'readMsg')
     def testSendMessageToMSPEngines(self,mock_output):
+        #[commandX,commandY,markerCharacter]
         listOfValues = [200,201,10]
         mock_output.return_value=bytes(listOfValues)
         receivedMsg = joy.readMsg()
@@ -53,6 +54,17 @@ class testJoystick(unittest.TestCase):
         success = joy.sendMessageToEnginesMSPs(command)
 
         self.assertEqual(success,True)
+
+    @patch.object(Joystick,'readMsg')
+    def testTranslateMessageWithMissingValue(self,mock_output):
+        #[commandX,Missing commandY,markerCharacter]
+        listOfValues = [200,10]
+        mock_output.return_value=bytes(listOfValues)
+        receivedMsg = joy.readMsg()
+        isMissingValue = joy.verifyIfMessageContainsError(receivedMsg)
+
+        self.assertEqual(isMissingValue,True)
+
 
 if __name__ == '__main__':
 	unittest.main()
