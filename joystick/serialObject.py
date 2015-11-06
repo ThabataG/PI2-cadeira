@@ -33,9 +33,8 @@ class SerialObject(object):
         try:
             serialObject.flushInput()
             serialObject.flushOutput()
-            serialObject.write(command[0].encode())
-            serialObject.write(command[1].encode())
-            serialObject.close()
+            serialObject.write(bytes(command[0]))
+            serialObject.write(bytes(command[1]))
         except Exception as e:
             print("Error write in serial port: " + str(e))
             exit()
