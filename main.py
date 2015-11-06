@@ -15,10 +15,10 @@ if __name__ == "__main__":
             messageFromJoystick = joy.getMessageFromJoystick()
             if messageFromJoystick != None:
                 command = joy.translateCommandFromMSP(messageFromJoystick)
-                print("Command:")
-                print(command)
-                if command != "":
-                    joy.sendMessageToEnginesMSPs(command)
+#                print("Command:")
+#                print(command)
+#                if command != "":
+#                    joy.sendMessageToEnginesMSPs(command)
         except KeyboardInterrupt as e:
             print("Keyboard Interrupt occured!\n")
             exit()

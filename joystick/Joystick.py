@@ -11,7 +11,7 @@ class Joystick(object):
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(pinNumber,GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
         self.setupInterruption()
-        self.setupWriteSerial()
+#        self.setupWriteSerial()
 
     def getMessageFromJoystick(self):
         return messageFromJoystick
@@ -24,12 +24,15 @@ class Joystick(object):
 
     def translateCommandFromMSP(self,message):
         haveNewLine = message.find(b'\n')
+        print("Message to be translated ")
+        print(message)
         if haveNewLine != -1:
             message = message.rstrip(b'\n')
             commands = []
             for char in message:
                 commands.append(char)
         #        command = message.split(" ",1)
+#            print("Message translated: " + ''.join(str(e) for e in commands))
             return commands
         return ""
 
@@ -54,7 +57,7 @@ class Joystick(object):
 
     def readMsg():
         return None
-
+# MSG esta demorando pra chegar: Ou buffer do MSP não está pronto a tempo ou falha de comunicação entre MSP e Rasp
 def readMsg(channel):
     global serialObjectJoystick #to set serial object
     global messageFromJoystick
