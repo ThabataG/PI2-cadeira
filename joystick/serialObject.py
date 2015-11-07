@@ -29,6 +29,18 @@ class SerialObject(object):
         return serialObject
 
     @staticmethod
+    def flushBuffer(serialObject):
+        if serialObject.isOpen():
+            try:
+                serialObject.flushInput()
+                serialObject.flushOutput()
+            except Exception as exception:
+                print("error communicating...: " + str(exception))
+        else:
+        	print("cannot open serial port ")
+
+
+    @staticmethod
     def writeWithSerial(serialObject, command):
         try:
             serialObject.flushInput()
