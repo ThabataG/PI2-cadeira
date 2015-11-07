@@ -18,5 +18,5 @@ class Motor(object):
     def startConnection(self):
         self.serialPort = SerialObject.connectWithSerialPort(self.serialPort)
 
-    def sendMessageToMSP(self):
-        return None
+    def sendMessageToMSP(self,x,y):
+        return SerialObject.writeWithSerial(self.serialPort, [x, y])
