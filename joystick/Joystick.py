@@ -50,23 +50,6 @@ class Joystick(object):
             return commands
         return ""
 
-############### TODO NEED TO REFACTOR FROM HERE!!! TODO #########
-
-
-    def openConnectionToWrite(self):
-        global serialObjectEngine
-        serialObjectEngine = SerialObject.connectWithSerialPort(serialObjectEngine)
-
-    def sendMessageToEnginesMSPs(self,command):
-        self.openConnectionToWrite()
-        successSendMessage = False
-        if self.verifyIfMessageContainsError(command) == False:
-            successSendMessage = SerialObject.writeWithSerial(serialObjectEngine,command)
-
-        serialObjectEngine.serialObject.close()
-
-        return successSendMessage
-
     def verifyIfMessageContainsError(self,receivedMsg):
         if len(receivedMsg) != 3 :
             return True
@@ -75,4 +58,3 @@ class Joystick(object):
 
     def readMsg():
         return None
-# MSG esta demorando pra chegar: Ou buffer do MSP não está pronto a tempo ou falha de comunicação entre MSP e Rasp
