@@ -1,41 +1,42 @@
 from serialObject import *
 
-serialObjectEngine = None
-messageFromJoystick = None
-
 class Joystick(object):
-    __serialPort = None
 
     def __init__(self):
+        # object attributes
+        self.x = 0
+        self.y = 0
+        self.serialPort = None
+        self.usbPort = "/dev/ttyACM0"
+
+        # set up serial connection
         self.initSerial()
         self.startConnection()
         # TODO: try to clear buffer while buffer not flushed
-        self.flushBuffer()
+        SerialObject.flushBuffer(self.serialPort)
 #        self.setupWriteSerial()
 
     def initSerial(self):
-        usbPort = "/dev/ttyACM0"
-        self.serialPort = SerialObject.initSerialObject(usbPort)
+        self.serialPort = SerialObject.initSerialObject(self.usbPort)
 
     def startConnection(self):
         self.serialPort = SerialObject.connectWithSerialPort(self.serialPort)
 
-    def flushBuffer(self):
-        if self.serialPort.isOpen():
-            try:
-                self.serialPort.flushInput()
-                self.serialPort.flushOutput()
-            except Exception as exception:
-                print("error communicating...: " + str(exception))
-        else:
-        	print("cannot open serial port ")
-
     def getMessage(self):
         try:
+            # Get trash from serial
             self.serialPort.readline()
+            # Guarantee of read real message
             return self.serialPort.readline()
         except KeyboardInterrupt:
             exit()
+
+    def updateXY(self):
+        message = self.getMessage()
+        if message != None:
+            command = self.translateCommandFromMSP(message)
+            self.x = command[0]
+            self.y = command[1]
 
     def translateCommandFromMSP(self,message):
         haveNewLine = message.find(b'\n')
@@ -51,11 +52,6 @@ class Joystick(object):
 
 ############### TODO NEED TO REFACTOR FROM HERE!!! TODO #########
 
-
-    def setupWriteSerial(self):
-        global serialObjectEngine
-        usbPort = "/dev/ttyACM1"
-        serialObjectEngine = SerialObject.initSerialObject(usbPort)
 
     def openConnectionToWrite(self):
         global serialObjectEngine
