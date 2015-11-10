@@ -2,25 +2,32 @@
  * Integration Project II - 2º/2015
  *
  * This script is used to control the duty cycle of a PWM using UART.
- * Input: character on RX UART
- * Output: PWM signal in P1.6 (green LED on LaunchPad)
+ * Input: Character on P1.1 RX UART.
+ * Output: Two PWM signals in P1.0(TA1) and P1.6(TA2) -> LEDs red and green on LaunchPad.
  */
 
 // Headings
 #include <msp430.h>
  
 // Definitions
-#define RLED BIT0
-#define GLED BIT6
+#define PWM1 BIT5
+#define SEL1 BIT0
+#define PWM2 BIT6
+#define SEL2 BIT4
 #define BTN BIT3
 #define RXPIN BIT1
 #define TXPIN BIT2
-#define CYCLE 0xF	// PWM frequency = SMCLK / CYCLE
+#define CYCLE 0x7530	// PWM frequency = SMCLK / CYCLE
 
 // Prototypes
 void timerA_config();
 void uart_config();
 void port1_config();
+void update_m1();
+void update_m2();
+
+// Global variables
+unsigned char rxbuf;
 
 // Main
 int main() {
@@ -31,16 +38,54 @@ int main() {
 	timerA_config();
 	uart_config();
 	port1_config();
+	rxbuf = '\n';
 	
-	_BIS_SR(LPM0_bits+GIE);
+	while(1) {
+		// Wait the marker byte
+		while(rxbuf != '\n') 
+			_BIS_SR(LPM0_bits+GIE);
+		
+		// Receive data and update motor 01
+		_BIS_SR(LPM0_bits+GIE);
+		update_m1();
+		
+		// Receive data and update motor 02
+		_BIS_SR(LPM0_bits+GIE);
+		update_m2();
+	}
 	
 	return 0;
+}
+
+// Update motor 01
+void update_m1() {
+	if(rxbuf > 127) {
+		P1OUT |= SEL1;
+		TACCR1 = (CYCLE * (2*(int)rxbuf - 254)) / 256;	
+	}
+	else {
+		P1OUT &= ~SEL1;
+		TACCR1 = (CYCLE * (250 - 2*(int)rxbuf)) / 250;
+	}
+}
+
+// Update motor 02
+void update_m2() {
+	if(rxbuf >= 127) {
+		P1OUT |= SEL2;
+		TACCR2 = (CYCLE * (2*(int)rxbuf - 254)) / 255;	
+	}
+	else {
+		P1OUT &= ~SEL2;
+		TACCR2 = (CYCLE * (255 - 2*(int)rxbuf)) / 255;
+	}
 }
 
 // UART RX interruption controller
 void USCI0RXInt(void) __attribute__((interrupt(USCIAB0RX_VECTOR)));
 void USCI0RXInt(void) {
-	TACCR1 = (CYCLE * UCA0RXBUF) / 255;
+	rxbuf = UCA0RXBUF;
+	LPM0_EXIT;
 }
 
 // Initialize TimerA
@@ -51,8 +96,10 @@ void timerA_config() {
 	TACCR0 = CYCLE-1;
 	// Duty cycle
 	TACCR1 = CYCLE/4;
+	TACCR2 = CYCLE/4;
 	// Output mode 7: reset/set
 	TACCTL1 = OUTMOD_7;
+	TACCTL2 = OUTMOD_7;
 	//      SMCLK      /1     upmode
 	TACTL = TASSEL_2 + ID_0 + MC_1;
 }
@@ -75,10 +122,8 @@ void uart_config() {
 // Initialize Port1
 void port1_config() {
 	// Initial setup
-	P1DIR = RLED + GLED;
-	P1SEL = GLED + RXPIN + TXPIN;
+	P1DIR = PWM1 + PWM2 + SEL1 + SEL2;
+	P1SEL = PWM1 + PWM2 + RXPIN + TXPIN;
 	P1SEL2 = RXPIN + TXPIN;
-	// Initial state of leds
-	P1OUT = RLED;
 }
 
