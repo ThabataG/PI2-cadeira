@@ -1,26 +1,42 @@
 from serialObject import *
 
-pinNumber = 11
-serialObjectJoystick = None
-serialObjectEngine = None
-messageFromJoystick = None
-
 class Joystick(object):
 
     def __init__(self):
-        GPIO.setmode(GPIO.BOARD)
-        GPIO.setup(pinNumber,GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
-        self.setupInterruption()
-        self.setupWriteSerial()
+        # object attributes
+        self.x = 0
+        self.y = 0
+        self.serialPort = None
+        self.usbPort = "/dev/ttyACM0"
 
-    def getMessageFromJoystick(self):
-        return messageFromJoystick
+        # set up serial connection
+        self.initSerial()
+        self.startConnection()
+        # TODO: try to clear buffer while buffer not flushed
+        SerialObject.flushBuffer(self.serialPort)
+#        self.setupWriteSerial()
 
-    def setupInterruption(self):
-        global serialObjectJoystick
-        usbPort = "/dev/ttyACM0"
-        serialObjectJoystick = SerialObject.initSerialObject(usbPort)
-        GPIO.add_event_detect(pinNumber, GPIO.FALLING, callback=readMsg, bouncetime=300)
+    def initSerial(self):
+        self.serialPort = SerialObject.initSerialObject(self.usbPort)
+
+    def startConnection(self):
+        self.serialPort = SerialObject.connectWithSerialPort(self.serialPort)
+
+    def getMessage(self):
+        try:
+            # Get trash from serial
+            self.serialPort.readline()
+            # Guarantee of read real message
+            return self.serialPort.readline()
+        except KeyboardInterrupt:
+            exit()
+
+    def updateXY(self):
+        message = self.getMessage()
+        if message != None:
+            command = self.translateCommandFromMSP(message)
+            self.x = command[0]
+            self.y = command[1]
 
     def translateCommandFromMSP(self,message):
         haveNewLine = message.find(b'\n')
@@ -30,54 +46,15 @@ class Joystick(object):
             for char in message:
                 commands.append(char)
         #        command = message.split(" ",1)
+#            print("Message translated: " + ''.join(str(e) for e in commands))
             return commands
         return ""
 
-
-    def setupWriteSerial(self):
-        global serialObjectEngine
-        usbPort = "/dev/ttyACM1"
-        serialObjectEngine = SerialObject.initSerialObject(usbPort)
-
-    def openConnectionToWrite(self):
-        global serialObjectEngine
-        serialObjectEngine = SerialObject.connectWithSerialPort(serialObjectEngine)
-
-    def sendMessageToEnginesMSPs(self,command):
-        self.openConnectionToWrite()
-
-        commandToMSPEngine = command
-
-        sucess_sends_comands = SerialObject.writeWithSerial(serialObjectEngine,commandToMSPEngine)
-
-        return sucess_sends_comands
+    def verifyIfMessageContainsError(self,receivedMsg):
+        if len(receivedMsg) != 3 :
+            return True
+        else:
+            return False
 
     def readMsg():
         return None
-
-def readMsg(channel):
-    global serialObjectJoystick #to set serial object
-    global messageFromJoystick
-    serialObjectJoystick = SerialObject.connectWithSerialPort(serialObjectJoystick)
-    if serialObjectJoystick.isOpen():
-        try:
-            serialObjectJoystick.flushInput() # Flush input buffer, discarding all its contents
-            serialObjectJoystick.flushOutput() # Flush output buffer, aborting current output and discard all that is in buffer
-    		# Write data
-    		#s.write("AT+CSQ")
-    		#print("write data: AT+CSQ")
-    		#time.sleep(0.5)  				# Give the serial port sometime to receive the data
-            try:
-                response = serialObjectJoystick.readline()
-#                for char in response:
-#                    print(char)
-#                print("Received Msg")
-                messageFromJoystick = response
-            except KeyboardInterrupt:
-                GPIO.cleanup()
-
-            serialObjectJoystick.close()
-        except Exception as e:
-            print("error communicating...: " + str(e))
-    else:
-    	print("cannot open serial port ")
