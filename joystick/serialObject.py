@@ -42,8 +42,9 @@ class SerialObject(object):
     @staticmethod
     def writeWithSerial(serialObject, command):
         try:
-            serialObject.write(bytes(command[0]))
-            serialObject.write(bytes(command[1]))
+            serialObject.write('\n')	
+            serialObject.write(chr(command[0]))
+            serialObject.write(chr(command[1]))
         except Exception as e:
             print("Error write in serial port: " + str(e))
             return False
