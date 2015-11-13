@@ -16,8 +16,8 @@ if __name__ == "__main__":
     while True:
         try:
             joy.updateXY()
-            print("Command: " + str(joy.x) + " " + str(joy.y))
-            # motor.sendMessageToMSP(joy.x, joy.y)
+            print("(" + str(joy.x) + "," + str(joy.y) + ")")
+            motor.sendMessageToMSP(joy.x, joy.y)
         except KeyboardInterrupt as e:
             print("Keyboard Interrupt occured!\n")
             exit()
