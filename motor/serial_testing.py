@@ -33,14 +33,18 @@ if s.isOpen():
 		#print("write data: AT+CSQ")
 		#time.sleep(0.5)  				# Give the serial port sometime to receive the data
 		print("start writing...")
-		loops = 20
+		loops = 10
 		while True:
 			for i in range(0,255):
 				for j in range(loops):
-					s.write(chr(i))
+					s.write('\n')
+					s.write(chr(i|1))
+					s.write(chr(i|1))
 			for i in range(255,0,-1):
 				for j in range(loops):
-					s.write(chr(i))
+					s.write('\n')
+					s.write(chr(i|1))
+					s.write(chr(i|1))
 		s.close()
 		print("communication closed.")
 	except Exception, e1:
