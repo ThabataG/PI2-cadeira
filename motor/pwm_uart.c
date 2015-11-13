@@ -10,14 +10,15 @@
 #include <msp430.h>
  
 // Definitions
-#define PWM1 BIT5
-#define SEL1 BIT0
-#define PWM2 BIT6
-#define SEL2 BIT4
-#define BTN BIT3
+#define RLED BIT0
 #define RXPIN BIT1
 #define TXPIN BIT2
-#define CYCLE 0x7530	// PWM frequency = SMCLK / CYCLE
+#define BTN BIT3
+#define SEL1 BIT4
+#define PWM1 BIT7
+#define PWM2 BIT6
+#define SEL2 BIT5
+#define CYCLE 0x3530	// PWM frequency = SMCLK / CYCLE
 
 // Prototypes
 void timerA_config();
@@ -39,33 +40,66 @@ int main() {
 	uart_config();
 	port1_config();
 	rxbuf = '\n';
+	P1OUT |= RLED;
 	
 	while(1) {
+		// Blink red led
+		P1OUT ^= RLED;
+		
+		// Enable interruption via TimerA
+		TACTL |= TAIE;
+		_BIS_SR(LPM0_bits+GIE);
+		
+		/*************************************************
+		 Receive data and update PWM and selectors values 
+		*************************************************/
+		// Enable interruption via UART RX
+		IE2 |= UCA0RXIE;
 		// Wait the marker byte
 		while(rxbuf != '\n') 
 			_BIS_SR(LPM0_bits+GIE);
-		
 		// Receive data and update motor 01
 		_BIS_SR(LPM0_bits+GIE);
 		update_m1();
-		
 		// Receive data and update motor 02
 		_BIS_SR(LPM0_bits+GIE);
 		update_m2();
+		// Disable interruption via UART RX
+		IE2 &= ~UCA0RXIE;
 	}
 	
 	return 0;
+}
+
+// Timer A interruption controller
+void TIMERAInt(void) __attribute__((interrupt(TIMER0_A1_VECTOR)));
+void TIMERAInt(void) {
+	// Disable interruption via TimerA
+	//TACTL &= ~TAIE;
+	// Clear TimerA interruption flag
+	TACTL &= ~TAIFG;
+	// Exit Low Power Mode 0
+	LPM0_EXIT;
+}
+
+// UART RX interruption controller
+void USCI0RXInt(void) __attribute__((interrupt(USCIAB0RX_VECTOR)));
+void USCI0RXInt(void) {
+	// Update variable 'rxbuf' saving the last received byte
+	rxbuf = UCA0RXBUF;
+	// Exit Low Power Mode 0
+	LPM0_EXIT;
 }
 
 // Update motor 01
 void update_m1() {
 	if(rxbuf > 127) {
 		P1OUT |= SEL1;
-		TACCR1 = (CYCLE * (2*(int)rxbuf - 254)) / 256;	
+		TACCR1 = (CYCLE * (2*(long long)rxbuf - 254)) / 256;	
 	}
 	else {
 		P1OUT &= ~SEL1;
-		TACCR1 = (CYCLE * (250 - 2*(int)rxbuf)) / 250;
+		TACCR1 = (CYCLE * (250 - 2*(long long)rxbuf)) / 250;
 	}
 }
 
@@ -73,19 +107,12 @@ void update_m1() {
 void update_m2() {
 	if(rxbuf >= 127) {
 		P1OUT |= SEL2;
-		TACCR2 = (CYCLE * (2*(int)rxbuf - 254)) / 255;	
+		TACCR2 = (CYCLE * (2*(long long)rxbuf - 254)) / 255;	
 	}
 	else {
 		P1OUT &= ~SEL2;
-		TACCR2 = (CYCLE * (255 - 2*(int)rxbuf)) / 255;
+		TACCR2 = (CYCLE * (255 - 2*(long long)rxbuf)) / 255;
 	}
-}
-
-// UART RX interruption controller
-void USCI0RXInt(void) __attribute__((interrupt(USCIAB0RX_VECTOR)));
-void USCI0RXInt(void) {
-	rxbuf = UCA0RXBUF;
-	LPM0_EXIT;
 }
 
 // Initialize TimerA
@@ -115,15 +142,16 @@ void uart_config() {
 	UCA0BR1 = 0;
 	// ?
 	UCA0MCTL = UCBRF_8 + UCOS16;
-	// Enable interruption via UART RX
-	IE2 |= UCA0RXIE;
+	// Disable interruption via UART RX
+	IE2 &= ~UCA0RXIE;
 }
 
 // Initialize Port1
 void port1_config() {
 	// Initial setup
-	P1DIR = PWM1 + PWM2 + SEL1 + SEL2;
+	P1DIR = PWM1 + PWM2 + SEL1 + SEL2 + RLED;
 	P1SEL = PWM1 + PWM2 + RXPIN + TXPIN;
 	P1SEL2 = RXPIN + TXPIN;
+	P1OUT &= ~RLED;
 }
 
