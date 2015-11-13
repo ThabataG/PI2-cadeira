@@ -1,3 +1,13 @@
+import sys,os,inspect
+
+# Relative importation of pathsToImport modules
+pathsToImport = ['serialObject']
+for path in pathsToImport:
+    cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0],"../"+path)))
+    if cmd_subfolder not in sys.path:
+        sys.path.insert(0, cmd_subfolder)
+
+
 from serialObject import *
 
 class Motor(object):
