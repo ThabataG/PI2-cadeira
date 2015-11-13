@@ -4,8 +4,8 @@ class Joystick(object):
 
     def __init__(self):
         # object attributes
-        self.x = 0
-        self.y = 0
+        self.x = 1
+        self.y = 1
         self.serialPort = None
         self.usbPort = "/dev/ttyACM0"
 
@@ -14,7 +14,7 @@ class Joystick(object):
         self.startConnection()
         # TODO: try to clear buffer while buffer not flushed
         SerialObject.flushBuffer(self.serialPort)
-#        self.setupWriteSerial()
+		# self.setupWriteSerial()
 
     def initSerial(self):
         self.serialPort = SerialObject.initSerialObject(self.usbPort)
@@ -33,10 +33,11 @@ class Joystick(object):
 
     def updateXY(self):
         message = self.getMessage()
-        if message != None:
+	# print(len(message))
+	if len(message) == 3:
             command = self.translateCommandFromMSP(message)
-            self.x = command[0]
-            self.y = command[1]
+            self.x = ord(command[0]) | 1
+            self.y = ord(command[1]) | 1
 
     def translateCommandFromMSP(self,message):
         haveNewLine = message.find(b'\n')
@@ -45,13 +46,13 @@ class Joystick(object):
             commands = []
             for char in message:
                 commands.append(char)
-        #        command = message.split(" ",1)
-#            print("Message translated: " + ''.join(str(e) for e in commands))
+        # command = message.split(" ",1)
+		# print("Message translated: " + ''.join(str(e) for e in commands))
             return commands
         return ""
 
     def verifyIfMessageContainsError(self,receivedMsg):
-        if len(receivedMsg) != 3 :
+        if len(receivedMsg) != 2:
             return True
         else:
             return False
