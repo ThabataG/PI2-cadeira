@@ -62,3 +62,7 @@ target/
 
 # MSP executable files
 *.elf
+
+# Ignore vim and sublime text backup files
+*.save
+*.swp
