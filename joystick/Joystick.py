@@ -1,11 +1,21 @@
+import sys,os,inspect
+
+# Relative importation of pathsToImport modules
+pathsToImport = ['serialObject']
+for path in pathsToImport:
+    cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0],"../"+path)))
+    if cmd_subfolder not in sys.path:
+        sys.path.insert(0, cmd_subfolder)
+
+
 from serialObject import *
 
 class Joystick(object):
 
     def __init__(self):
         # object attributes
-        self.x = 1
-        self.y = 1
+        self.x = 0
+        self.y = 0
         self.serialPort = None
         self.usbPort = "/dev/ttyACM0"
 
@@ -14,7 +24,6 @@ class Joystick(object):
         self.startConnection()
         # TODO: try to clear buffer while buffer not flushed
         SerialObject.flushBuffer(self.serialPort)
-		# self.setupWriteSerial()
 
     def initSerial(self):
         self.serialPort = SerialObject.initSerialObject(self.usbPort)
@@ -33,11 +42,10 @@ class Joystick(object):
 
     def updateXY(self):
         message = self.getMessage()
-	# print(len(message))
-	if len(message) == 3:
+        if message != None:
             command = self.translateCommandFromMSP(message)
-            self.x = ord(command[0]) | 1
-            self.y = ord(command[1]) | 1
+            self.x = command[0]
+            self.y = command[1]
 
     def translateCommandFromMSP(self,message):
         haveNewLine = message.find(b'\n')
@@ -46,13 +54,13 @@ class Joystick(object):
             commands = []
             for char in message:
                 commands.append(char)
-        # command = message.split(" ",1)
-		# print("Message translated: " + ''.join(str(e) for e in commands))
+        #        command = message.split(" ",1)
+#            print("Message translated: " + ''.join(str(e) for e in commands))
             return commands
         return ""
 
     def verifyIfMessageContainsError(self,receivedMsg):
-        if len(receivedMsg) != 2:
+        if len(receivedMsg) != 3:
             return True
         else:
             return False
