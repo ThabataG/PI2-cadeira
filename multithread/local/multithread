@@ -1,0 +1,25 @@
+class Joystick (Thread):
+    def __init__(self):
+        Thread.__init__(self)
+        self.x = 1
+        self.y = 1
+    def run(self):
+        print "Starting Joy-"
+        print_time("Joys-", 1, 3)
+        print "Exiting Joy-"
+
+class Motor (Thread):
+    def __init__(self):
+       	Thread.__init__(self)
+    def run(self):
+        print "Starting Mot-"
+        print_time("Motor", 1, 3)
+        print "Exiting Mot-"
+
+def print_time(threadName, delay, counter):
+    while counter:
+        if exitFlag:
+            threadName.exit()
+        time.sleep(delay)
+        print "%s: %s" % (threadName, time.ctime(time.time()))
+        counter -= 1
