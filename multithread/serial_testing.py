@@ -9,7 +9,7 @@ import logging
 def initSerialObject(portName, allowWriting):
     serialObject = serial.Serial(
     	port = portName,
-    	baudrate = 9600,
+    	baudrate = 115200,
     	bytesize = serial.EIGHTBITS,			# Number of bits per bytes
     	parity = serial.PARITY_NONE,			# Set parity check: no parity
     	stopbits = serial.STOPBITS_ONE,			# Number of stop bits
@@ -60,7 +60,7 @@ while True:
 	if s.isOpen():
 		try:
 			#reset_input_buffer()				# Flush input buffer, discarding all its contents
-			# reset_output_buffer()				# Flush output buffer, aborting current output 
+			# reset_output_buffer()				# Flush output buffer, aborting current output
 							   					# and discard all that is in buffer
 			# Write data
 			#s.write("AT+CSQ")

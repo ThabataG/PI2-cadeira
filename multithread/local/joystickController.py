@@ -7,7 +7,7 @@ from serialObject import *
 import serial
 
 class JoystickController(threading.Thread):
-	
+
 	def __init__(self):
 		# Init a new thread
 		threading.Thread.__init__(self)
@@ -53,7 +53,7 @@ class JoystickController(threading.Thread):
 			if s.isOpen():
 				try:
 					#reset_input_buffer()				# Flush input buffer, discarding all its contents
-					# reset_output_buffer()				# Flush output buffer, aborting current output 
+					# reset_output_buffer()				# Flush output buffer, aborting current output
 									   					# and discard all that is in buffer
 					# Write data
 					#s.write("AT+CSQ")
@@ -68,7 +68,7 @@ class JoystickController(threading.Thread):
 								if c[0] & 1:
 									globs.coordinates['x'] = c[1] & 0xFE
 									globs.coordinates['y'] = c[0] | 0x01
-								else: 
+								else:
 									globs.coordinates['x'] = c[0] & 0xFE
 									globs.coordinates['y'] = c[1] | 0x01
 								globs.lock.release()
@@ -137,7 +137,7 @@ class JoystickController(threading.Thread):
 							if c[0] & 1:
 								globs.coordinates['x'] = c[1] & 0xFE
 								globs.coordinates['y'] = c[0] | 0x01
-							else: 
+							else:
 								globs.coordinates['x'] = c[0] & 0xFE
 								globs.coordinates['y'] = c[1] | 0x01
 							globs.lock.release()

@@ -7,7 +7,7 @@ class SerialObject(object):
     def initSerialObject(portName, allowWriting):
         serialObject = serial.Serial(
         	port = portName,
-        	baudrate = 9600,
+        	baudrate = 115200,
         	bytesize = serial.EIGHTBITS,			# Number of bits per bytes
         	parity = serial.PARITY_NONE,			# Set parity check: no parity
         	stopbits = serial.STOPBITS_ONE,			# Number of stop bits
@@ -40,7 +40,7 @@ class SerialObject(object):
     @staticmethod
     def writeWithSerial(serialObject, command):
         try:
-            serialObject.write('\n')	
+            serialObject.write('\n')
             serialObject.write(chr(command[0]))
             serialObject.write(chr(command[1]))
         except Exception as exception:
