@@ -16,10 +16,10 @@ import globs
 if __name__ == "__main__":
 	# Config log file
 	logging.basicConfig(filename='main.log',level=logging.INFO)
-	
+
 	# Init global variables
 	globs.init_globals()
-	
+
 	# Create new threads
 	joy = joystickController.JoystickController()
 	motor = motorController.MotorController()
@@ -38,4 +38,3 @@ if __name__ == "__main__":
 	# Wait for thread to finish running
 	joy.join()
 	motor.join()
-
