@@ -5,5 +5,6 @@ def init_globals():
 	global lock
 	lock = threading.Lock()
 	global coordinates
-	coordinates = {'x': 0, 'y': 1}	
-
+	coordinates = {'x': 0, 'y': 1}
+	global wait
+	wait = False
