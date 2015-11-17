@@ -16,6 +16,9 @@ class JoystickController(threading.Thread):
 
 	def run(self):
 		while True:
+			globs.lock.acquire()
+			globs.wait = True
+			globs.lock.release()
 			isOpen = False
 			port = 0
 			while True:
@@ -51,15 +54,18 @@ class JoystickController(threading.Thread):
 				else:
 					port = 0
 			if s.isOpen():
+				globs.lock.acquire()
+				globs.wait = False
+				globs.lock.release()
 				try:
-					#reset_input_buffer()				# Flush input buffer, discarding all its contents
+					#reset_input_buffer()				# Flush input buffer, discarding all it contents
 					# reset_output_buffer()				# Flush output buffer, aborting current output
 									   					# and discard all that is in buffer
 					# Write data
 					#s.write("AT+CSQ")
 					#print("write data: AT+CSQ")
 					#time.sleep(0.5)  				# Give the serial port sometime to receive the data
-					logging.info("start writing...")
+					logging.info("start reading...")
 					while True:
 						try:
 							c = s.read(30)
