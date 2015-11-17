@@ -30,8 +30,8 @@ void send_data();
 // Main
 int main() {
 	WDTCTL = WDTPW + WDTHOLD; // Stop WDT
-	BCSCTL1 = CALBC1_1MHZ; // Set DCO
-	DCOCTL = CALDCO_1MHZ;
+	BCSCTL1 = CALBC1_16MHZ; // Set DCO
+	DCOCTL = CALDCO_16MHZ;
 
 	ad_config();
 	uart_config();
@@ -63,11 +63,9 @@ void send_data() {
 	volatile char y = 0xFF & (samples[1] >> 2);
 //	P1OUT ^= GLED + RLED;
 	while (!(IFG2 & UCA0TXIFG));
-	UCA0TXBUF = x | 1;
+	UCA0TXBUF = x & 0xFE;
 	while (!(IFG2 & UCA0TXIFG));
-	UCA0TXBUF = y | 1;
-	while (!(IFG2 & UCA0TXIFG));
-	UCA0TXBUF = '\n';
+	UCA0TXBUF = y | 0x01;
 }
 
 // Initialize ADC10
@@ -92,11 +90,14 @@ void uart_config() {
 	UCA0CTL0 = 0;
 	// SMCLK
 	UCA0CTL1 = UCSSEL_2;
-	// baud rate 9600
-	UCA0BR0 = 6;
-	UCA0BR1 = 0;
-	// ?
-	UCA0MCTL = UCBRF_8 + UCOS16;
+	// baud rate 115200 -> 16 MHz
+	UCA0BR0 = 130;//8;
+	UCA0BR1 = 6;//0;
+
+    // First modulation stage select
+    UCA0MCTL = UCBRS2+UCBRS1;
+
+//	UCA0MCTL = UCBRF_11 + UCOS16;
 }
 
 // Initialize Port1
