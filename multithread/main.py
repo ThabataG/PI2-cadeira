@@ -36,5 +36,5 @@ if __name__ == "__main__":
 			print("Exiting Main Thread")
 			exit()
 	# Wait for thread to finish running
-	joy.join()
-	motor.join()
+	#joy.join()
+	#motor.join()
