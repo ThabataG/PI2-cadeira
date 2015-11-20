@@ -1,5 +1,4 @@
 import serial
-#import RPi.GPIO as GPIO
 
 class SerialObject(object):
 

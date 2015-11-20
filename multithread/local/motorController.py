@@ -19,6 +19,23 @@ class MotorController(threading.Thread):
         self.x = 0
         self.y = 1
 
+    def run(self):
+        global serialMotor
+        while True:
+            while globs.wait:
+                #print("Inside while wait!")
+                continue
+            self.tryStablishConnection()
+            if serialMotor.isOpen():
+                try:
+                    logging.info("Motor: start writing...")
+                    self.update()
+                    serialMotor.close()
+                except Exception as e:
+                    logging.info("Motor: error communicating...: " + str(e))
+            else:
+                logging.info("Motor: cannot open serial port ")
+
     def findPort(self,port):
         global serialMotor
         while port < 2:
@@ -60,41 +77,24 @@ class MotorController(threading.Thread):
             else:
                 port = 0
 
-
-    def run(self):
-        global serialMotor
+    def update(self):
         while True:
-            while globs.wait:
-                #print("Inside while wait!")
-                continue
-            self.tryStablishConnection()
-            if serialMotor.isOpen():
-                try:
-                    logging.info("Motor: start writing...")
-                    while True:
-                        try:
-                            #write information
-                            #print("Writing information")
-                            globs.lock.acquire()
-                            if self.x != globs.coordinates['x'] or self.y != globs.coordinates['y']:
-                                print(str(globs.coordinates['x']) + ',' + str(globs.coordinates['y']))
-                                self.x = globs.coordinates['x']
-                                self.y = globs.coordinates['y']
-                                serialMotor.flushOutput()
-                                success = SerialObject.writeWithSerial(serialMotor,[self.x,self.y])
-                            else:
-                                #print("Else writing information")
-                                globs.lock.wait()
-                                logging.info("Motor: X and Y not change.")
-                                #break
-                            globs.lock.release()
-                        except KeyboardInterrupt:
-                            logging.info("Motor: Exiting via keyboard interruption...")
-                            serialMotor.close()
-                            logging.info("Motor: communication closed.")
-                            exit()
-                    serialMotor.close()
-                except Exception as e:
-                    logging.info("Motor: error communicating...: " + str(e))
-            else:
-                logging.info("Motor: cannot open serial port ")
+            try:
+                globs.lock.acquire()
+                if self.x != globs.coordinates['x'] or self.y != globs.coordinates['y']:
+                    print(str(globs.coordinates['x']) + ',' + str(globs.coordinates['y']))
+                    self.x = globs.coordinates['x']
+                    self.y = globs.coordinates['y']
+                    serialMotor.flushOutput()
+                    success = SerialObject.writeWithSerial(serialMotor,[self.x,self.y])
+                else:
+                    #print("Else writing information")
+                    globs.lock.wait()
+                    logging.info("Motor: X and Y not change.")
+                    #break
+                globs.lock.release()
+            except KeyboardInterrupt:
+                logging.info("Motor: Exiting via keyboard interruption...")
+                serialMotor.close()
+                logging.info("Motor: communication closed.")
+                exit()
