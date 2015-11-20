@@ -6,6 +6,8 @@ import globs
 from serialObject import *
 import serial
 
+serialMotor = None
+
 class MotorController(threading.Thread):
 
     def __init__(self):
@@ -17,7 +19,22 @@ class MotorController(threading.Thread):
         self.x = 0
         self.y = 1
 
+    def findPort(self):
+        global serialMotor
+        port = 0
+        while port < 2:
+            try:
+                serialMotor = SerialObject.initSerialObject("/dev/ttyACM" + str(port), True)
+                port += 1
+                return True
+            except serial.SerialException:
+                print("SerialException: device " + str(port) + " could not be found or could not be configured.")
+                port += 1
+                continue
+        return False
+
     def run(self):
+        global serialMotor
         while True:
             while globs.wait:
                 #print("Inside while wait!")
@@ -27,7 +44,7 @@ class MotorController(threading.Thread):
             while True:
                 while port < 2:
                     try:
-                        s = SerialObject.initSerialObject("/dev/ttyACM" + str(port), True)
+                        serialMotor = SerialObject.initSerialObject("/dev/ttyACM" + str(port), True)
                         isOpen = True
                         port += 1
                         break
@@ -37,8 +54,8 @@ class MotorController(threading.Thread):
                         continue
                 if isOpen:
                     try:
-                        s.flushInput()
-                        rcv_str = s.read(10)
+                        serialMotor.flushInput()
+                        rcv_str = serialMotor.read(10)
                         if(len(rcv_str) == 0):
                             break
                         else:
@@ -47,12 +64,13 @@ class MotorController(threading.Thread):
                         logging.info("Motor: SerialException: port closed.")
                     except Exception:
                         logging.info("Motor: Flush input buffer error. (?)")
-                    if s.isOpen():
-                        s.close()
+                    if serialMotor.isOpen():
+                        serialMotor.close()
                     isOpen = False
                 else:
                     port = 0
-            if s.isOpen():
+                    #Talvez tirar esse else
+            if serialMotor.isOpen():
                 try:
 					#reset_input_buffer()				# Flush input buffer, discarding all its contents
 					# reset_output_buffer()				# Flush output buffer, aborting current output
@@ -71,8 +89,8 @@ class MotorController(threading.Thread):
                                 print(str(globs.coordinates['x']) + ',' + str(globs.coordinates['y']))
                                 self.x = globs.coordinates['x']
                                 self.y = globs.coordinates['y']
-                                s.flushOutput()
-                                success = SerialObject.writeWithSerial(s,[self.x,self.y])
+                                serialMotor.flushOutput()
+                                success = SerialObject.writeWithSerial(serialMotor,[self.x,self.y])
                             else:
                                 #print("Else writing information")
                                 globs.lock.wait()
@@ -81,10 +99,10 @@ class MotorController(threading.Thread):
                             globs.lock.release()
                         except KeyboardInterrupt:
                             logging.info("Motor: Exiting via keyboard interruption...")
-                            s.close()
+                            serialMotor.close()
                             logging.info("Motor: communication closed.")
                             exit()
-                    s.close()
+                    serialMotor.close()
                 except Exception as e:
                     logging.info("Motor: error communicating...: " + str(e))
             else:
