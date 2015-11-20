@@ -8,7 +8,7 @@
 
 // Headings
 #include <msp430.h>
- 
+
 // Definitions
 #define RLED BIT0
 #define RXPIN BIT1
@@ -24,50 +24,47 @@
 void timerA_config();
 void uart_config();
 void port1_config();
-void update_m1();
-void update_m2();
+void update();
+void update_right(unsigned char);
+void update_left(unsigned char);
 
 // Global variables
-unsigned char rxbuf;
+unsigned char rxbuf[2];
 
 // Main
 int main() {
 	WDTCTL = WDTPW + WDTHOLD; // Stop WDT
-	BCSCTL1 = CALBC1_1MHZ; // Set DCO
-	DCOCTL = CALDCO_1MHZ;
+	BCSCTL1 = CALBC1_16MHZ; // Set DCO
+	DCOCTL = CALDCO_16MHZ;
 
 	timerA_config();
 	uart_config();
 	port1_config();
-	rxbuf = '\n';
+    rxbuf[0] = rxbuf[1] = 0;
 	P1OUT |= RLED;
-	
+
 	while(1) {
 		// Blink red led
 		P1OUT ^= RLED;
-		
+
 		// Enable interruption via TimerA
 		TACTL |= TAIE;
 		_BIS_SR(LPM0_bits+GIE);
-		
+
 		/*************************************************
-		 Receive data and update PWM and selectors values 
+		 Receive data and update PWM and selectors values
 		*************************************************/
-		// Enable interruption via UART RX
+        // Enable interruption via UART RX
 		IE2 |= UCA0RXIE;
-		// Wait the marker byte
-		while(rxbuf != '\n') 
-			_BIS_SR(LPM0_bits+GIE);
-		// Receive data and update motor 01
+		// Receive data and update globals
 		_BIS_SR(LPM0_bits+GIE);
-		update_m1();
-		// Receive data and update motor 02
 		_BIS_SR(LPM0_bits+GIE);
-		update_m2();
+        // Update pwm duty cycles
+        update();
 		// Disable interruption via UART RX
 		IE2 &= ~UCA0RXIE;
 	}
-	
+
 	return 0;
 }
 
@@ -86,32 +83,48 @@ void TIMERAInt(void) {
 void USCI0RXInt(void) __attribute__((interrupt(USCIAB0RX_VECTOR)));
 void USCI0RXInt(void) {
 	// Update variable 'rxbuf' saving the last received byte
-	rxbuf = UCA0RXBUF;
+    if(!rxbuf[0] && !rxbuf[1])
+        rxbuf[0] = UCA0RXBUF;
+    else
+        rxbuf[1] = UCA0RXBUF;
 	// Exit Low Power Mode 0
 	LPM0_EXIT;
 }
 
-// Update motor 01
-void update_m1() {
-	if(rxbuf > 127) {
+// Update motors duty cycle
+void update() {
+    if(rxbuf[0] & 1) {
+        update_right(rxbuf[1]);
+        update_left(rxbuf[0]);
+    }
+    else {
+        update_right(rxbuf[0]);
+        update_left(rxbuf[1]);
+    }
+    rxbuf[0] = rxbuf[1] = 0;
+}
+
+// Update right motor
+void update_left(unsigned char value) {
+	if(value > 127) {
 		P1OUT |= SEL1;
-		TACCR1 = (CYCLE * (2*(long long)rxbuf - 254)) / 256;	
+		TACCR1 = (CYCLE * (2*(long long)value - 258)) / 252;
 	}
 	else {
 		P1OUT &= ~SEL1;
-		TACCR1 = (CYCLE * (250 - 2*(long long)rxbuf)) / 250;
+		TACCR1 = (CYCLE * (254 - 2*(long long)value)) / 252;
 	}
 }
 
-// Update motor 02
-void update_m2() {
-	if(rxbuf >= 127) {
+// Update left motor
+void update_right(unsigned char value) {
+	if(value > 126) {
 		P1OUT |= SEL2;
-		TACCR2 = (CYCLE * (2*(long long)rxbuf - 254)) / 255;	
+		TACCR2 = (CYCLE * (2*(long long)value - 256)) / 252;
 	}
 	else {
 		P1OUT &= ~SEL2;
-		TACCR2 = (CYCLE * (255 - 2*(long long)rxbuf)) / 255;
+		TACCR2 = (CYCLE * (252 - 2*(long long)value)) / 252;
 	}
 }
 
@@ -138,10 +151,10 @@ void uart_config() {
 	// SMCLK
 	UCA0CTL1 = UCSSEL_2;
 	// baud rate 9600
-	UCA0BR0 = 6;
-	UCA0BR1 = 0;
-	// ?
-	UCA0MCTL = UCBRF_8 + UCOS16;
+	UCA0BR0 = 103;
+	UCA0BR1 = 6;
+	// First modulation stage select
+	UCA0MCTL = UCBRS2+UCBRS1;
 	// Disable interruption via UART RX
 	IE2 &= ~UCA0RXIE;
 }
@@ -154,4 +167,3 @@ void port1_config() {
 	P1SEL2 = RXPIN + TXPIN;
 	P1OUT &= ~RLED;
 }
-
