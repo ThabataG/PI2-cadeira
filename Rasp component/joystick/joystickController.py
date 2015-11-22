@@ -1,6 +1,5 @@
 import logging
 import threading
-import joystick
 import globs
 
 from serialObject import *
