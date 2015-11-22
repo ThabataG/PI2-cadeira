@@ -3,21 +3,24 @@
  *
  * This script is used to control the duty cycle of a PWM using UART.
  * Input: Character on P1.1 RX UART.
- * Output: Two PWM signals in P1.0(TA1) and P1.6(TA2) -> LEDs red and green on LaunchPad.
+ * Output: Two PWM signals in PWM1(TA1) and PWM2(TA2) and two binary signals (SEL1 and SEL2) indicating the motors directions.
  */
 
 // Headings
 #include <msp430.h>
 
 // Definitions
+// P1
 #define RLED BIT0
+#define GLED BIT6
 #define RXPIN BIT1
 #define TXPIN BIT2
-#define BTN BIT3
-#define SEL1 BIT4
-#define PWM1 BIT7
-#define PWM2 BIT6
-#define SEL2 BIT5
+// P2
+#define PWM1 BIT1
+#define SEL1 BIT2
+#define SEL2 BIT3
+#define PWM2 BIT4
+// PWM PERIOD
 #define CYCLE 0x3530	// PWM frequency = SMCLK / CYCLE
 
 // Prototypes
@@ -41,15 +44,14 @@ int main() {
 	uart_config();
 	port1_config();
     rxbuf[0] = rxbuf[1] = 0;
-	P1OUT |= RLED;
-
+	
 	while(1) {
-		// Blink red led
-		P1OUT ^= RLED;
-
+		// Blink leds (swaping their states)
+		P1OUT ^= RLED + GLED;
+        
 		// Enable interruption via TimerA
-		TACTL |= TAIE;
-		_BIS_SR(LPM0_bits+GIE);
+		//TA1CTL |= TAIE;
+		//_BIS_SR(LPM0_bits+GIE);
 
 		/*************************************************
 		 Receive data and update PWM and selectors values
@@ -59,7 +61,7 @@ int main() {
 		// Receive data and update globals
 		_BIS_SR(LPM0_bits+GIE);
 		_BIS_SR(LPM0_bits+GIE);
-        // Update pwm duty cycles
+		// Update pwm duty cycles
         update();
 		// Disable interruption via UART RX
 		IE2 &= ~UCA0RXIE;
@@ -74,7 +76,7 @@ void TIMERAInt(void) {
 	// Disable interruption via TimerA
 	//TACTL &= ~TAIE;
 	// Clear TimerA interruption flag
-	TACTL &= ~TAIFG;
+	TA1CTL &= ~TAIFG;
 	// Exit Low Power Mode 0
 	LPM0_EXIT;
 }
@@ -107,41 +109,41 @@ void update() {
 // Update right motor
 void update_left(unsigned char value) {
 	if(value > 127) {
-		P1OUT |= SEL1;
-		TACCR1 = (CYCLE * (2*(long long)value - 258)) / 252;
+		P2OUT |= SEL1;
+		TA1CCR1 = (CYCLE * (2*(long long)value - 257)) / 252;
 	}
 	else {
-		P1OUT &= ~SEL1;
-		TACCR1 = (CYCLE * (254 - 2*(long long)value)) / 252;
+		P2OUT &= ~SEL1;
+		TA1CCR1 = (CYCLE * (255 - 2*(long long)value)) / 252;
 	}
 }
 
 // Update left motor
 void update_right(unsigned char value) {
 	if(value > 126) {
-		P1OUT |= SEL2;
-		TACCR2 = (CYCLE * (2*(long long)value - 256)) / 252;
+		P2OUT |= SEL2;
+		TA1CCR2 = (CYCLE * (2*(long long)value - 255)) / 252;
 	}
 	else {
-		P1OUT &= ~SEL2;
-		TACCR2 = (CYCLE * (252 - 2*(long long)value)) / 252;
+		P2OUT &= ~SEL2;
+		TA1CCR2 = (CYCLE * (253 - 2*(long long)value)) / 252;
 	}
 }
 
 // Initialize TimerA
 void timerA_config() {
 	// It's a good practice to stop timer before changing its configuration
-	TACTL = MC_0;
+	TA1CTL = MC_0;
 	// Period
-	TACCR0 = CYCLE-1;
+	TA1CCR0 = CYCLE-1;
 	// Duty cycle
-	TACCR1 = CYCLE/4;
-	TACCR2 = CYCLE/4;
+	TA1CCR1 = CYCLE/4;
+	TA1CCR2 = CYCLE/4;
 	// Output mode 7: reset/set
-	TACCTL1 = OUTMOD_7;
-	TACCTL2 = OUTMOD_7;
-	//      SMCLK      /1     upmode
-	TACTL = TASSEL_2 + ID_0 + MC_1;
+	TA1CCTL1 = OUTMOD_7;
+	TA1CCTL2 = OUTMOD_7;
+	//      SMCLK       upmode
+	TA1CTL = TASSEL_2 + MC_1;
 }
 
 // Initialize UART
@@ -162,8 +164,12 @@ void uart_config() {
 // Initialize Port1
 void port1_config() {
 	// Initial setup
-	P1DIR = PWM1 + PWM2 + SEL1 + SEL2 + RLED;
-	P1SEL = PWM1 + PWM2 + RXPIN + TXPIN;
+	// UART
+	P1DIR = RLED + GLED + RXPIN + TXPIN;
+	P1OUT = RLED;
+	P1SEL = RXPIN + TXPIN;
 	P1SEL2 = RXPIN + TXPIN;
-	P1OUT &= ~RLED;
+	// PWM and motors control
+	P2DIR = SEL1 + SEL2 + PWM1 + PWM2; 
+	P2SEL = PWM1 + PWM2;
 }
