@@ -3,7 +3,7 @@ import logging
 import threading
 
 # Relative importation of pathsToImport modules
-pathsToImport = ['local']
+pathsToImport = ['joystick', 'motor', 'interchange']
 for path in pathsToImport:
     cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0],path)))
     if cmd_subfolder not in sys.path:
