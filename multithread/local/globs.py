@@ -8,5 +8,3 @@ def init_globals():
     coordinates = {'x': 0, 'y': 1}
     global wait
     wait = True
-#    global serialJoystick
-#    serialJoystick = None

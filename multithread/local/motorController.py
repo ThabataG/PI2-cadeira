@@ -6,7 +6,7 @@ import globs
 from serialObject import *
 import serial
 
-serialMotor = None
+from Connect import *
 
 class MotorController(threading.Thread):
 
@@ -16,41 +16,30 @@ class MotorController(threading.Thread):
         # set up joystick logging file
         logging.basicConfig(filename='motor.log',level=logging.INFO)
         # object attributes
+        #FIXME set this dictionary for all
+        self.motorAttr = {"port":0,
+                        "serial":None}
         self.x = 0
         self.y = 1
 
     def run(self):
-        global serialMotor
         while True:
             while globs.wait:
                 #print("Inside while wait!")
                 continue
             self.tryStablishConnection()
-            if serialMotor.isOpen():
+            if self.motorAttr["serial"].isOpen():
                 try:
                     logging.info("Motor: start writing...")
                     self.update()
-                    serialMotor.close()
+                    self.motorAttr["serial"].close()
                 except Exception as e:
                     logging.info("Motor: error communicating...: " + str(e))
             else:
                 logging.info("Motor: cannot open serial port ")
 
-    def findPort(self,port):
-        global serialMotor
-        while port < 2:
-            try:
-                serialMotor = SerialObject.initSerialObject("/dev/ttyACM" + str(port), True)
-                port += 1
-                return True,port
-            except serial.SerialException:
-                print("SerialException: device " + str(port) + " could not be found or could not be configured.")
-                port += 1
-                continue
-        return False,port
-
     def tryReceiveData(self):
-        rcv_str = serialMotor.read(10)
+        rcv_str = self.motorAttr["serial"].read(10)
         if(len(rcv_str) == 0):
             return False
         else:
@@ -59,23 +48,23 @@ class MotorController(threading.Thread):
 
     def tryStablishConnection(self):
         isOpen = False
-        port = 0
+        self.motorAttr["port"] = 0
         while True:
-            isOpen,port = self.findPort(port)
+            isOpen = Connect.findPort(self.motorAttr)
             if isOpen:
                 try:
-                    serialMotor.flushInput()
+                    self.motorAttr["serial"].flushInput()
                     if self.tryReceiveData() == False:
                         break
                 except serial.SerialException:
                     logging.info("Motor: SerialException: port closed.")
                 except Exception:
                     logging.info("Motor: Flush input buffer error. (?)")
-                if serialMotor.isOpen():
-                    serialMotor.close()
+                if self.motorAttr["serial"].isOpen():
+                    self.motorAttr["serial"].close()
                 isOpen = False
             else:
-                port = 0
+                self.motorAttr["port"] = 0
 
     def update(self):
         while True:
@@ -85,8 +74,8 @@ class MotorController(threading.Thread):
                     print(str(globs.coordinates['x']) + ',' + str(globs.coordinates['y']))
                     self.x = globs.coordinates['x']
                     self.y = globs.coordinates['y']
-                    serialMotor.flushOutput()
-                    success = SerialObject.writeWithSerial(serialMotor,[self.x,self.y])
+                    self.motorAttr["serial"].flushOutput()
+                    success = SerialObject.writeWithSerial(self.motorAttr["serial"],[self.x,self.y])
                 else:
                     #print("Else writing information")
                     globs.lock.wait()
@@ -95,6 +84,6 @@ class MotorController(threading.Thread):
                 globs.lock.release()
             except KeyboardInterrupt:
                 logging.info("Motor: Exiting via keyboard interruption...")
-                serialMotor.close()
+                self.motorAttr["serial"].close()
                 logging.info("Motor: communication closed.")
                 exit()
