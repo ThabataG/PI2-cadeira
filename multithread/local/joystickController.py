@@ -4,9 +4,8 @@ import joystick
 import globs
 
 from serialObject import *
-import serial
 
-serialJoystick = None
+from Connect import *
 
 class JoystickController(threading.Thread):
 
@@ -15,25 +14,15 @@ class JoystickController(threading.Thread):
         threading.Thread.__init__(self)
         # set up joystick logging file
         logging.basicConfig(filename='joy.log',level=logging.INFO)
-
-    def findPort(self,port):
-        global serialJoystick
-        while port < 2:
-            try:
-                serialJoystick = SerialObject.initSerialObject("/dev/ttyACM" + str(port), True)
-                port += 1
-                return True,port
-            except serial.SerialException:
-                print("SerialException: device " + str(port) + " could not be found or could not be configured.")
-                port += 1
-                continue
-        return False,port
+        #FIXME set this dictionary for all
+        self.joyAttr = {"port":0,
+                        "serial":None}
 
     def run(self):
         global serialJoystick
         while True:
             self.tryStablishConnection()
-            if serialJoystick.isOpen():
+            if self.joyAttr["serial"].isOpen():
                 #logging.warning("WAARNING: HERE")
                 globs.lock.acquire()
                 globs.wait = False
@@ -46,10 +35,10 @@ class JoystickController(threading.Thread):
                                 break
                         except KeyboardInterrupt:
                             logging.info("Exiting via keyboard interruption...")
-                            serialJoystick.close()
+                            self.joyAttr["serial"].close()
                             logging.info("Joystick :communication closed.")
                             exit()
-                    serialJoystick.close()
+                    self.joyAttr["serial"].close()
                     logging.info("Joystick :communication closed.")
                 except Exception as e:
                     logging.info("Joystick : error communicating...: " + str(e))
@@ -57,46 +46,44 @@ class JoystickController(threading.Thread):
                 logging.info("Joystick: cannot open serial port ")
 
     def tryReceiveData(self):
-        serialJoystick.flushInput()
-        rcv_str = serialJoystick.read(10)
+        self.joyAttr["serial"].flushInput()
+        rcv_str = self.joyAttr["serial"].read(10)
         if(len(rcv_str) == 10):
             isOpen = True
         else:
             logging.info("Joystick :Failed to read from serial.")
-            if serialJoystick.isOpen():
-                serialJoystick.close()
+            if self.joyAttr["serial"].isOpen():
+                self.joyAttr["serial"].close()
             isOpen = False
-
         return isOpen
-
 
     def tryStablishConnection(self):
         globs.lock.acquire()
         globs.wait = True
         globs.lock.release()
         isOpen = False
-        port = 0
+        self.joyAttr["port"] = 0
         while True:
-            isOpen,port = self.findPort(port)
+            isOpen = Connect.findPort(self.joyAttr)
             if isOpen:
                 try:
                     isOpen = self.tryReceiveData()
                     if isOpen == True:
                         break
-                except serial.SerialException:
+                except self.joyAttr["serial"].SerialException:
                     logging.info("Joystick :SerialException: port closed.")
                     isOpen = False
                 except Exception:
                     logging.info("Joystick :Flush input buffer error. (?)")
-                    if serialJoystick.isOpen():
-                        serialJoystick.close()
+                    if self.joyAttr["serial"].isOpen():
+                        self.joyAttr["serial"].close()
                     isOpen = False
             else:
                 port = 0
 
     def updateGlobs(self):
-        serialJoystick.flushInput()
-        c = serialJoystick.read(2)
+        self.joyAttr["serial"].flushInput()
+        c = self.joyAttr["serial"].read(2)
         if(len(c) == 2):
             globs.lock.acquire()
             if c[0] & 1:
