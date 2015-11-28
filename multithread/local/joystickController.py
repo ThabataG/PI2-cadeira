@@ -14,15 +14,13 @@ class JoystickController(threading.Thread):
         threading.Thread.__init__(self)
         # set up joystick logging file
         logging.basicConfig(filename='joy.log',level=logging.INFO)
-        #FIXME set this dictionary for all
-        self.dict = {"port":0,
-                     "serial":None}
+        self.port = 0
+        self.serial = None
 
     def run(self):
-        global serialJoystick
         while True:
             self.tryStablishConnection()
-            if self.dict["serial"].isOpen():
+            if self.serial.isOpen():
                 #logging.warning("WAARNING: HERE")
                 globs.lock.acquire()
                 globs.wait = False
@@ -35,10 +33,10 @@ class JoystickController(threading.Thread):
                                 break
                         except KeyboardInterrupt:
                             logging.info("Exiting via keyboard interruption...")
-                            self.dict["serial"].close()
+                            self.serial.close()
                             logging.info("Joystick :communication closed.")
                             exit()
-                    self.dict["serial"].close()
+                    self.serial.close()
                     logging.info("Joystick :communication closed.")
                 except Exception as e:
                     logging.info("Joystick : error communicating...: " + str(e))
@@ -50,28 +48,28 @@ class JoystickController(threading.Thread):
         globs.wait = True
         globs.lock.release()
         isOpen = False
-        self.dict["port"] = 0
+        self.port = 0
         while True:
-            isOpen = Connect.findPort(self.dict)
+            isOpen = Connect.findPort(self)
             if isOpen:
                 try:
                     isOpen = Connect.tryReceiveData(self)
                     if isOpen == True:
                         break
-                except self.dict["serial"].SerialException:
+                except self.serial.SerialException:
                     logging.info("Joystick :SerialException: port closed.")
                     isOpen = False
                 except Exception:
                     logging.info("Joystick :Flush input buffer error. (?)")
-                    if self.dict["serial"].isOpen():
-                        self.dict["serial"].close()
+                    if self.serial.isOpen():
+                        self.serial.close()
                     isOpen = False
             else:
                 port = 0
 
     def updateGlobs(self):
-        self.dict["serial"].flushInput()
-        c = self.dict["serial"].read(2)
+        self.serial.flushInput()
+        c = self.serial.read(2)
         if(len(c) == 2):
             globs.lock.acquire()
             if c[0] & 1:
