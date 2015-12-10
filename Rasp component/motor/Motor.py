@@ -9,4 +9,4 @@ class Motor(threading.Thread):
 	# Start thread
 	def run(self):
 		while not self.kill_received:
-			print("b")
+			continue #print("b")

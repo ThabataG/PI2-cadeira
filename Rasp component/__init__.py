@@ -17,3 +17,7 @@ referencePaths(pathsToImport)
 # Import modules
 from Joystick import *
 from Motor import *
+
+# Initialize globals
+import Globals
+Globals.init_globals()

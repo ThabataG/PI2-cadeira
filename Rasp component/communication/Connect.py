@@ -8,7 +8,6 @@ class Connect(object):
 		# Reset obj.port if it is greater than maxPortNumber
 		if obj.port > maxPortNumber:
 			obj.port = 0
-			logging
 		# Search for an openned serial port
 		couldConnect = False
 		while obj.port <= maxPortNumber:
@@ -21,7 +20,34 @@ class Connect(object):
 				break
 		return couldConnect
 
+
 '''
+	# 
+	@staticmethod
+	def tryStablishConnection(self):
+		globs.lock.acquire()
+		globs.wait = True
+		globs.lock.release()
+		isOpen = False
+		self.port = 0
+		while True:
+			isOpen = Connect.findPort(self)
+			if isOpen:
+				try:
+					isOpen = Connect.tryReceiveData(self)
+					if isOpen == True:
+						break
+				except self.serial.SerialException:
+					logging.info("Joystick :SerialException: port closed.")
+					isOpen = False
+				except Exception:
+					logging.info("Joystick :Flush input buffer error. (?)")
+					if self.serial.isOpen():
+						self.serial.close()
+					isOpen = False
+			else:
+				port = 0
+
 	# 
 	@staticmethod
 	def tryReceiveData(obj):

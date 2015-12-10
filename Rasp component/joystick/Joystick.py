@@ -1,4 +1,5 @@
 import threading
+import Globals
 from Connect import *
 
 class Joystick(threading.Thread):
@@ -14,7 +15,10 @@ class Joystick(threading.Thread):
 	# Start thread
 	def run(self):
 		while not self.kill_received:
-			print("a")
+			Globals.lock.acquire()
+			print(Globals.x)
+			Globals.x += 1
+			Globals.lock.release()
 
 '''
 	def run(self):
