@@ -30,6 +30,7 @@ class Joystick(threading.Thread):
 			print("Any problem happened, trying to connect again.")
 			updated = False
 		else:
+			updated = True
 			Globals.lock.acquire()
 			if coordinates[0] & 1:
 				Globals.coordinates['x'] = coordinates[1] & 0xFE
@@ -40,7 +41,7 @@ class Joystick(threading.Thread):
 			print("(" + str(Globals.coordinates['x']) + ", " + str(Globals.coordinates['y']) + ")")
 			Globals.lock.notify()
 			Globals.lock.release()
-			return True
+		return updated
 
 '''
 	def run(self):
