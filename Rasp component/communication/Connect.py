@@ -6,58 +6,58 @@ class Connect(object):
 	# Search serial ports until find and make a valid joystick serial port connection
 	@staticmethod
 	def connectJoy(obj):
-		logging.debug("Start trying to make a joystick connection")
+		print("Start trying to make a joystick connection")
 		joyConnected = False
 		obj.port = 0
 		while not joyConnected:
 			joyConnected = Connect.searchSerialPort(obj)
 			if joyConnected:
-				logging.debug("Serial port found")
+				print("Serial port opened")
 				joyConnected = Connect.validJoyConnection(obj)
 				if not joyConnected:
 					obj.port += 1
-					logging.debug("Not a valid joystick serial connection")
+					Connect.close(self.serial)
+					print("Not a valid joystick serial connection")
 				else:
-					logging.debug("Valid joystick serial connection")
+					print("Valid joystick serial connection")
 			else:
-				logging.debug("No serial ports found")
+				print("No serial ports found")
 				obj.port = 0
 
-	# Search for an openned serial port between [0,maxPortNumber] and open it
+	# Search for an opened serial port between [0,maxPortNumber] and open it
 	# Return False if no ports where found and True otherwise
 	@staticmethod
 	def searchSerialPort(obj, maxPortNumber=1, serialPrefix="/dev/ttyACM"):
 		# Reset obj.port if it is greater than maxPortNumber
 		if obj.port > maxPortNumber:
 			obj.port = 0
-			logging.debug("Reset port counter 'obj.port'")
-		# Search for an openned serial port
+			print("Reset port counter 'obj.port'")
+		# Search for an opened serial port
 		couldConnect = False
 		while obj.port <= maxPortNumber:
 			obj.serial = Serial.init(serialPrefix + str(obj.port))
+			print(str(obj.serial.__class__))
+			print("Make a new serial object at port " + str(obj.port))
 			if obj.serial == None:
+				print("Serial connection not performed in port " + str(obj.port))
 				obj.port += 1
-				#logging.warning("Serial connection not performed in port " + str(obj.port))
 			else:
 				couldConnect = True
+				print("Connection stablished")
 				break
 		return couldConnect
 
 	# Tests whether a serial connection is a joystick or not
-	# If the connection is openned and the system is receiving data, is assumed that it is a valid 
+	# If the connection is opened and the system is receiving data, is assumed that it is a valid 
 	# joystick connection
 	@staticmethod
 	def validJoyConnection(obj, numBytesToReceive=10):
 		isValid = False
-		try:
-			receivedString = Connect.read(obj.serial, numBytesToReceive)
-			logging.debug(receivedString)
-			if(len(receivedString) == numBytesToReceive):
-				isValid = True
-			else:
-				obj.serial.close()
-				isValid = False
-		except Serial.serial.SerialException:
+		receivedString = Connect.read(obj.serial, numBytesToReceive)
+		print(receivedString)
+		if(len(receivedString) == numBytesToReceive):
+			isValid = True
+		else:
 			isValid = False
 		return isValid
 
@@ -68,9 +68,22 @@ class Connect(object):
 		try:
 			serialObject.flushInput()
 			receivedString = serialObject.read(numOfBytesToRead)
-		except serialObject.SerialException:
+		except Serial.SerialException:
 			receivedString = ""
+			serialObject.close()
+		except Exception:
+			print("flush input error: probably the usb was disconnected")
+			receivedString = ""
+			serialObject.close()
 		return receivedString
+
+	#
+	@staticmethod
+	def close(serialObject):
+		if(serialObject.isOpen()):
+			print("Serial port closed")
+			serialObject.close()
+
 '''
 	# 
 	@staticmethod
