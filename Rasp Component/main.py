@@ -12,14 +12,20 @@ pathsToImport = ['joystick', 'motor', 'communication']
 referencePaths(pathsToImport)
 
 from Joystick import *
+from Motor import *
 
 # Main
 if __name__ == "__main__":
 	joystick = Joystick()
+	motor = Motor()
+
 	joystick.start()
-	
+	motor.start()
+
 	try:
 		joystick.join()
+		motor.join()
 	except KeyboardInterrupt:
 		joystick.kill_received = True
+		motor.kill_received = True
 		print("aê bixin")
