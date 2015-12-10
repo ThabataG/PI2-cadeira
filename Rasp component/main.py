@@ -17,9 +17,9 @@ if __name__ == "__main__":
 		motor.join()
 
 	# When ^C is pressed, the kill_received flag is setted
-	except KeyboardInterrupt as e:
-		joystick.kill_received = True
-		motor.kill_received = True
+	except KeyboardInterrupt:
+		joystick.killReceived = True
+		motor.killReceived = True
 		logging.info("Exiting program")
 		exit()
 
@@ -27,5 +27,5 @@ if __name__ == "__main__":
 	except Exception:
 		joystick.kill_received = True
 		motor.kill_received = True
-		logging.critical("Unknown threading exception raised, closing the program")
+		logging.critical("Threading exception raised, closing the program")
 		exit()

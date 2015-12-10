@@ -6,7 +6,7 @@ class Joystick(threading.Thread):
 	# Initialize thread and Joystick instance attributes
 	def __init__(self):
 		threading.Thread.__init__(self)
-		self.kill_received = False
+		self.killReceived = False
 		# className = str.split(str(self.__class__),"'")[1]
 		# self.logger = Logger(className)
 		self.port = 0
@@ -14,7 +14,7 @@ class Joystick(threading.Thread):
 
 	# Start thread
 	def run(self):
-		while not self.kill_received:
+		while not self.killReceived:
 			Globals.lock.acquire()
 			print(Globals.x)
 			Globals.x += 1
