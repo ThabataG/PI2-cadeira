@@ -10,8 +10,8 @@ class Connect(object):
 		joyConnected = False
 		obj.port = 0
 		while not joyConnected:
-			joyConnected = Connect.searchSerialPort(obj)
-			if joyConnected:
+			usbConnected = Connect.searchSerialPort(obj)
+			if usbConnected:
 				print("Serial port opened")
 				joyConnected = Connect.validJoyConnection(obj)
 				if not joyConnected:
@@ -21,6 +21,7 @@ class Connect(object):
 				else:
 					print("Valid joystick serial connection")
 			else:
+				joyConnected = False
 				print("No serial ports found")
 				obj.port = 0
 
