@@ -1,6 +1,9 @@
 import serial
 
 class Serial(object):
+	# Declare SerialException as a Serial 
+	SerialException = serial.SerialException
+
 	# Initialize connection with a serial port using UART protocol
 	@staticmethod
 	def init(portName, canWrite=True):
