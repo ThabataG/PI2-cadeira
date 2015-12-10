@@ -14,11 +14,13 @@ class Joystick(threading.Thread):
 
 	# Start thread
 	def run(self):
+		Connect.connectJoy(self)
 		while not self.killReceived:
-			Globals.lock.acquire()
-			print(Globals.x)
-			Globals.x += 1
-			Globals.lock.release()
+			print(self.serial.read(10))
+			#Globals.lock.acquire()
+			#print(Globals.x)
+			#Globals.x += 1
+			#Globals.lock.release()
 
 '''
 	def run(self):

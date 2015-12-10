@@ -6,5 +6,5 @@ def init_globals():
 	lock = threading.Condition()
 	global coordinates
 	coordinates = {'x': 0, 'y': 1}
-	global x
-	x = 0
+	global joyConnected
+	joyConnected = False
