@@ -14,13 +14,33 @@ class Joystick(threading.Thread):
 
 	# Start thread
 	def run(self):
-		Connect.connectJoy(self)
 		while not self.killReceived:
-			print(Connect.read(self.serial))
-			#Globals.lock.acquire()
-			#print(Globals.x)
-			#Globals.x += 1
-			#Globals.lock.release()
+			Connect.connectJoy(self)
+			while not self.killReceived:
+				coordinates = Connect.read(self.serial,30)
+				print(coordinates)
+				if not self.updateGlobals(coordinates):
+					Connect.close(self.serial)
+					break
+
+	# Update global variable 'coordinates'
+	def updateGlobals(self, coordinates):
+		updated = False
+		if len(coordinates) < 2:
+			print("Any problem happened, trying to connect again.")
+			updated = False
+		else:
+			Globals.lock.acquire()
+			if coordinates[0] & 1:
+				Globals.coordinates['x'] = coordinates[1] & 0xFE
+				Globals.coordinates['y'] = coordinates[0] | 0x01
+			else:
+				Globals.coordinates['x'] = coordinates[0] & 0xFE
+				Globals.coordinates['y'] = coordinates[1] | 0x01
+			print("(" + str(Globals.coordinates['x']) + ", " + str(Globals.coordinates['y']) + ")")
+			Globals.lock.notify()
+			Globals.lock.release()
+			return True
 
 '''
 	def run(self):
@@ -28,9 +48,9 @@ class Joystick(threading.Thread):
 			self.stablishConnection()
 			if self.serial.isOpen():
 				#logging.warning("WAARNING: HERE")
-				globs.lock.acquire()
-				globs.wait = False
-				globs.lock.release()
+				Globals.lock.acquire()
+				Globals.wait = False
+				Globals.lock.release()
 				try:
 					logging.info("start reading...")
 					while True:
@@ -50,9 +70,9 @@ class Joystick(threading.Thread):
 				logging.info("Joystick: cannot open serial port ")
 
 	def tryStablishConnection(self):
-		globs.lock.acquire()
-		globs.wait = True
-		globs.lock.release()
+		Globals.lock.acquire()
+		Globals.wait = True
+		Globals.lock.release()
 		isOpen = False
 		self.port = 0
 		while True:
@@ -77,18 +97,18 @@ class Joystick(threading.Thread):
 		self.serial.flushInput()
 		c = self.serial.read(2)
 		if(len(c) == 2):
-			globs.lock.acquire()
+			Globals.lock.acquire()
 			if c[0] & 1:
-				globs.coordinates['x'] = c[1] & 0xFE
-				globs.coordinates['y'] = c[0] | 0x01
+				Globals.coordinates['x'] = c[1] & 0xFE
+				Globals.coordinates['y'] = c[0] | 0x01
 
 			else:
-				globs.coordinates['x'] = c[0] & 0xFE
-				globs.coordinates['y'] = c[1] | 0x01
+				Globals.coordinates['x'] = c[0] & 0xFE
+				Globals.coordinates['y'] = c[1] | 0x01
 
-			#print("(" + str(globs.coordinates['x']) + ", "+str(globs.coordinates['y']) + ")")
-			globs.lock.notify()
-			globs.lock.release()
+			#print("(" + str(Globals.coordinates['x']) + ", "+str(Globals.coordinates['y']) + ")")
+			Globals.lock.notify()
+			Globals.lock.release()
 			return True
 		else:
 			logging.info("JOY: failed to read from serial.")
