@@ -1,13 +1,13 @@
 import logging
 
 class Logger():
-
+	# Initialize logging
 	def __init__(self,loggerName):
 		self.loggerName = loggerName
 		self.logger = createLogger()
 
+	# Create logging service
 	def createLogger():
-
 		logger = logging.getLogger(self.loggerName)
 		logger.setLevel(logging.DEBUG)
 		# create console handler and set level to debug

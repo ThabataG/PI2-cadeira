@@ -3,6 +3,7 @@
   Disciplina: Projeto Integrador II
 """
 from __init__ import *
+
 # Main
 if __name__ == "__main__":
 	try:
