@@ -1,26 +1,26 @@
 from Serial import *
 import logging
-logging.basicConfig(level=print)
+logging.basicConfig(filename="", level=logging.DEBUG)
 
 class Connect(object):
 	# Search serial ports until find and make a valid joystick serial port connection
 	@staticmethod
 	def connectJoy(obj):
-		print("Start trying to make a joystick connection")
+		logging.debug("Start trying to make a joystick connection")
 		joyConnected = False
 		obj.port = 0
 		while not joyConnected:
 			joyConnected = Connect.searchSerialPort(obj)
 			if joyConnected:
-				print("Serial port found")
+				logging.debug("Serial port found")
 				joyConnected = Connect.validJoyConnection(obj)
 				if not joyConnected:
 					obj.port += 1
-					print("Not a valid joystick serial connection")
+					logging.debug("Not a valid joystick serial connection")
 				else:
-					print("Valid joystick serial connection")
+					logging.debug("Valid joystick serial connection")
 			else:
-				print("No serial ports found")
+				logging.debug("No serial ports found")
 				obj.port = 0
 
 	# Search for an openned serial port between [0,maxPortNumber] and open it
@@ -30,6 +30,7 @@ class Connect(object):
 		# Reset obj.port if it is greater than maxPortNumber
 		if obj.port > maxPortNumber:
 			obj.port = 0
+			logging.debug("Reset port counter 'obj.port'")
 		# Search for an openned serial port
 		couldConnect = False
 		while obj.port <= maxPortNumber:
@@ -46,13 +47,12 @@ class Connect(object):
 	# If the connection is openned and the system is receiving data, is assumed that it is a valid 
 	# joystick connection
 	@staticmethod
-	def validJoyConnection(obj):
+	def validJoyConnection(obj, numBytesToReceive=10):
 		isValid = False
 		try:
-			obj.serial.flushInput()
-			receiveString = obj.serial.read(10)
-			print(receiveString)
-			if(len(receiveString) == 10):
+			receivedString = Connect.read(obj.serial, numBytesToReceive)
+			logging.debug(receivedString)
+			if(len(receivedString) == numBytesToReceive):
 				isValid = True
 			else:
 				obj.serial.close()
@@ -61,6 +61,16 @@ class Connect(object):
 			isValid = False
 		return isValid
 
+	# 
+	@staticmethod
+	def read(serialObject, numOfBytesToRead=2):
+		receivedString = ""
+		try:
+			serialObject.flushInput()
+			receivedString = serialObject.read(numOfBytesToRead)
+		except serialObject.SerialException:
+			receivedString = ""
+		return receivedString
 '''
 	# 
 	@staticmethod

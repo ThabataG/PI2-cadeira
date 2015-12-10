@@ -16,7 +16,7 @@ class Joystick(threading.Thread):
 	def run(self):
 		Connect.connectJoy(self)
 		while not self.killReceived:
-			print(self.serial.read(10))
+			print(Connect.read(self.serial))
 			#Globals.lock.acquire()
 			#print(Globals.x)
 			#Globals.x += 1
