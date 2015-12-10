@@ -28,9 +28,9 @@ class Serial(object):
 	@staticmethod
 	def write(serialObject, data):
 		try:
-			bytesWritten = serialObject.write(bytearray(data))
+			numBytesWritten = serialObject.write(bytearray(data))
 		except serial.SerialException:
 			#logging.error("Serial port closed")
-			bytesWritten = 0
+			numBytesWritten = 0
 		# Return the number of bytes written via serial
-		return bytesWritten
+		return numBytesWritten
