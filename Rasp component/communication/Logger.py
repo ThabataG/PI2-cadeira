@@ -4,10 +4,10 @@ class Logger():
 	# Initialize logging
 	def __init__(self,loggerName):
 		self.loggerName = loggerName
-		self.logger = createLogger()
+		self.logger = self.createLogger()
 
 	# Create logging service
-	def createLogger():
+	def createLogger(self):
 		logger = logging.getLogger(self.loggerName)
 		logger.setLevel(logging.DEBUG)
 		# create console handler and set level to debug
