@@ -33,13 +33,13 @@ class Connect(object):
 	# Search serial ports until find and make a valid joystick serial port connection
 	@staticmethod
 	def connectJoy(obj):
-		logger.logger.info("Start trying to make a joystick connection")
+		logger.logger.debug("Start trying to make a joystick connection")
 		joyConnected = False
 		obj.port = 0
 		while not joyConnected:
 			usbConnected = Connect.searchSerialPort(obj)
 			if usbConnected:
-				logger.logger.info("Serial port opened")
+				logger.logger.debug("Serial port opened")
 				joyConnected = Connect.validJoyConnection(obj)
 				if not joyConnected:
 					obj.port += 1
@@ -83,12 +83,13 @@ class Connect(object):
 		return couldConnect
 
 	# Tests whether a serial connection is a joystick or not
-	# If the connection is opened and the system is receiving data, it is assumed that it is a valid 
+	# If the connection is opened and the system is receiving data, is assumed that it is a valid
 	# joystick connection
 	@staticmethod
 	def validJoyConnection(obj, numBytesToReceive=10):
 		isValid = False
 		receivedString = Connect.read(obj.serial, numBytesToReceive)
+		print(receivedString)
 		if(len(receivedString) == numBytesToReceive):
 			isValid = True
 		else:
@@ -96,19 +97,20 @@ class Connect(object):
 		return isValid
 
 	# Tests whether a serial connection is a motor or not
-	# If the connection is opened and the system is not receiving data, it is assumed that it is a 
+	# If the connection is opened and the system is not receiving data, it is assumed that it is a
 	# valid motor connection
 	@staticmethod
 	def validMotorConnection(obj, numBytesToReceive=10):
 		isValid = False
 		receivedString = Connect.read(obj.serial, numBytesToReceive)
+		print(receivedString)
 		if(len(receivedString) == 0):
 			isValid = True
 		else:
 			isValid = False
 		return isValid
 
-	# 
+	#
 	@staticmethod
 	def read(serialObject, numOfBytesToRead=2):
 		receivedString = ""
@@ -120,7 +122,7 @@ class Connect(object):
 			serialObject.close()
 			print("read error: SerialException")
 		except Exception:
-		#	logger.logger.error("Flush input error: probably the usb was disconnected")
+			logger.logger.error("Flush input error: probably the usb was disconnected")
 			receivedString = ""
 			serialObject.close()
 			print("read error: Exception")
@@ -148,5 +150,5 @@ class Connect(object):
 	@staticmethod
 	def close(serialObject):
 		if(serialObject.isOpen()):
-		#	logger.logger.info("Serial port closed")
+			logger.logger.debug("Serial port closed")
 			serialObject.close()
