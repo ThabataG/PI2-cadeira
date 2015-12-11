@@ -1,40 +1,31 @@
-import sys, os, inspect
-import logging
-import threading
+"""
+  Universidade de Brasília - Campus Gama
+  Disciplina: Projeto Integrador II
+"""
+from __init__ import *
 
-# Relative importation of pathsToImport modules
-pathsToImport = ['joystick', 'motor', 'interchange']
-for path in pathsToImport:
-    cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0],path)))
-    if cmd_subfolder not in sys.path:
-        sys.path.insert(0, cmd_subfolder)
-
-import joystickController
-import motorController
-import globs
-
+# Main
 if __name__ == "__main__":
-	# Config log file
-	logging.basicConfig(filename='main.log',level=logging.INFO)
+	try:
+		# Initialize and run components
+		joystick = Joystick()
+		motor = Motor()
+		joystick.start()
+		motor.start()
+		# Wait for components to stop their routines
+		joystick.join()
+		motor.join()
 
-	# Init global variables
-	globs.init_globals()
+	# When ^C is pressed, the kill_received flag is setted
+	except KeyboardInterrupt:
+		joystick.killReceived = True
+		motor.killReceived = True
+		logging.info("Exiting program")
+		exit()
 
-	# Create new threads
-	joy = joystickController.JoystickController()
-	motor = motorController.MotorController()
-
-	# Start new Threads
-	joy.start()
-	motor.start()
-
-	while True:
-		try:
-			continue
-		except KeyboardInterrupt:
-			print("keyboard interruption here")
-			print("Exiting Main Thread")
-			exit()
-	# Wait for thread to finish running
-	#joy.join()
-	#motor.join()
+	# When a threading exception is raised
+	except Exception:
+		joystick.kill_received = True
+		motor.kill_received = True
+		logging.critical("Threading exception raised, closing the program")
+		exit()

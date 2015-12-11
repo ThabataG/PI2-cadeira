@@ -1,10 +1,12 @@
 import threading
 
+# Initialize global variables
 def init_globals():
-	# Globals
 	global lock
 	lock = threading.Condition()
 	global coordinates
 	coordinates = {'x': 0, 'y': 1}
-	global wait
-	wait = True
+	global joyConnected
+	joyConnected = False
+	global joyport
+	joyport = 0
