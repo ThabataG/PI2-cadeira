@@ -16,12 +16,19 @@ class Joystick(threading.Thread):
 	def run(self):
 		while not self.killReceived:
 			Connect.connectJoy(self)
+			self.setJoyConnectedFlag()
 			while not self.killReceived:
 				coordinates = Connect.read(self.serial,30)
 				print(coordinates)
 				if not self.updateGlobals(coordinates):
 					Connect.close(self.serial)
 					break
+
+	# 
+	def setJoyConnectedFlag(self):
+		Globals.lock.acquire()
+		Globals.joyConnected = True
+		Globals.lock.release()
 
 	# Update global variable 'coordinates'
 	def updateGlobals(self, coordinates):
