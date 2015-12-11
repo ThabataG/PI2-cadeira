@@ -6,7 +6,7 @@ class Serial(object):
 
 	# Initialize connection with a serial port using UART protocol
 	@staticmethod
-	def init(portName, canWrite=True):
+	def init(portName, canWrite=False):
 		try:
 			serialObject = serial.Serial(
 				port = portName,                  # Set and open serial port

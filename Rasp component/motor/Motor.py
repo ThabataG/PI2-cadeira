@@ -18,14 +18,14 @@ class Motor(threading.Thread):
 			continue
 		while not self.killReceived:
 			Connect.connectMotor(self)
-			while not self.killReceived:
-				if not self.updatePWM():
-					Connect.close(self.serial)
-					logging.info("Could not write data over serial")
+
+			if not self.updatePWM():
+				Connect.close(self.serial)
+				logging.info("Could not write data over serial")
 
 	def updatePWM(self):
-		writeWithSuccess = False
 		Globals.lock.acquire()
+		writeWithSuccess = True
 		if self.x != Globals.coordinates['x'] or self.y != Globals.coordinates['y']:
 			print(str(Globals.coordinates['x']) + ',' + str(Globals.coordinates['y']))
 			self.x = Globals.coordinates['x']

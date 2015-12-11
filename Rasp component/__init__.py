@@ -1,6 +1,6 @@
 # Import defensive programming tools
 import logging
-logging.basicConfig(filename="main.log", level=logging.DEBUG)
+logging.basicConfig(filename="main.log")
 
 # Relative referenciation of modules
 import sys, os, inspect

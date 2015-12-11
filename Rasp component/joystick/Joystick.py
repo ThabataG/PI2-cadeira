@@ -48,7 +48,7 @@ class Joystick(threading.Thread):
 			else:
 				Globals.coordinates['x'] = coordinates[0] & 0xFE
 				Globals.coordinates['y'] = coordinates[1] | 0x01
-			print("(" + str(Globals.coordinates['x']) + ", " + str(Globals.coordinates['y']) + ")")
+			#print("(" + str(Globals.coordinates['x']) + ", " + str(Globals.coordinates['y']) + ")")
 			Globals.lock.notify()
 			Globals.lock.release()
 		return updated
