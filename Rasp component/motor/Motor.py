@@ -14,14 +14,15 @@ class Motor(threading.Thread):
 
 	# Start thread
 	def run(self):
-		while not Globals.joyConnected:
-			continue
 		while not self.killReceived:
+			while not Globals.joyConnected:
+				continue
 			Connect.connectMotor(self)
-
-			if not self.updatePWM():
-				Connect.close(self.serial)
-				logging.info("Could not write data over serial")
+			while not self.killReceived:
+				if not self.updatePWM():
+					Connect.close(self.serial)
+					logging.info("Could not write data over serial")
+					break
 
 	def updatePWM(self):
 		Globals.lock.acquire()
