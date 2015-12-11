@@ -20,8 +20,8 @@ class Joystick(threading.Thread):
 		while not self.killReceived:
 			Connect.connectJoy(self)
 			while not self.killReceived:
-				coordinates = Connect.read(self.serial,30)
-				print(coordinates)
+				coordinates = Connect.read(self.serial,2)
+				#print(coordinates)
 				if not self.updateGlobals(coordinates):
 					Connect.close(self.serial)
 					break
