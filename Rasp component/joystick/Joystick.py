@@ -1,16 +1,19 @@
 import threading
 import Globals
 from Connect import *
+from Logger import *
 
 class Joystick(threading.Thread):
 	# Initialize thread and Joystick instance attributes
 	def __init__(self):
 		threading.Thread.__init__(self)
 		self.killReceived = False
-		# className = str.split(str(self.__class__),"'")[1]
-		# self.logger = Logger(className)
 		self.port = 0
 		self.serial = None
+
+		className = str.split(str(self.__class__),"'")[1]
+		self.logger = Logger(className)
+
 
 	# Start thread
 	def run(self):
@@ -18,8 +21,8 @@ class Joystick(threading.Thread):
 			Connect.connectJoy(self)
 			self.setJoyConnectedFlag()
 			while not self.killReceived:
-				coordinates = Connect.read(self.serial,30)
-				print(coordinates)
+				coordinates = Connect.read(self.serial,2)
+				#print(coordinates)
 				if not self.updateGlobals(coordinates):
 					Connect.close(self.serial)
 					break
@@ -34,7 +37,7 @@ class Joystick(threading.Thread):
 	def updateGlobals(self, coordinates):
 		updated = False
 		if len(coordinates) < 2:
-			print("Any problem happened, trying to connect again.")
+			self.logger.logger.warn("Any problem happened, trying to connect again.")
 			updated = False
 		else:
 			updated = True

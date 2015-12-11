@@ -1,7 +1,7 @@
 import serial
 
 class Serial(object):
-	# Declare SerialException as a Serial 
+	# Declare SerialException as a Serial
 	SerialException = serial.SerialException
 
 	# Initialize connection with a serial port using UART protocol
@@ -14,7 +14,7 @@ class Serial(object):
 				bytesize = serial.EIGHTBITS,      # Number of bits per byte
 				parity = serial.PARITY_NONE,      # Set parity check: no parity
 				stopbits = serial.STOPBITS_ONE,   # Number of stop bits
-				timeout = 0.01,                   # Timeout block read (seconds)
+				timeout = 1,                      # Timeout block read (seconds)
 				xonxoff = False,                  # Disable software flow control
 				rtscts = False,                   # Disable hardware (RTS/CTS) flow control
 				dsrdtr = False)                   # Disable hardware (DSR/DTR) flow control
