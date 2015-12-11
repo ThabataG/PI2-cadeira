@@ -18,7 +18,7 @@ class Connect(object):
 				joyConnected = Connect.validJoyConnection(obj)
 				if not joyConnected:
 					obj.port += 1
-					Connect.close(self.serial)
+					Connect.close(obj.serial)
 					logger.logger.warn("Not a valid joystick serial connection")
 				else:
 					logger.logger.info("Valid joystick serial connection")
