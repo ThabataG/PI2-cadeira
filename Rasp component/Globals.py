@@ -8,3 +8,5 @@ def init_globals():
 	coordinates = {'x': 0, 'y': 1}
 	global joyConnected
 	joyConnected = False
+	global joyport
+	joyport = 0
