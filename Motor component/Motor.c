@@ -107,35 +107,39 @@ void update() {
 }
 
 // Update right motor
-void update_left(unsigned char value) {
-	// Proccessing value in order to reduce sensitivity (dividing resolution by 6)
+void update_left(unsigned char buffer) {
+	// Processing value in order to reduce sensitivity (dividing resolution by 6)
+	unsigned long long value = buffer;
 	value /= 6;
 	if(value > 20) {
 		P2OUT |= SEL1;
-		TA1CCR1 = 0;
-		TA1CCR1 = (CYCLE * (2*value - 42)) / 42;
+		value = CYCLE * (2*value - 42);
+		value /= 42;
 	}
 	else {
 		P2OUT &= ~SEL1;
-		TA1CCR1 = 0;
-		TA1CCR1 = (CYCLE * (40 - 2*value)) / 40;
+		value = CYCLE * (40 - 2*value);
+		value /= 40;
 	}
+	TA1CCR1 = value;
 }
 
 // Update left motor
-void update_right(unsigned char value) {
-	// Proccessing value in order to reduce sensitivity (dividing resolution by 6)
+void update_right(unsigned char buffer) {
+	// Processing value in order to reduce sensitivity (dividing resolution by 6)
+	unsigned long long value = buffer;
 	value /= 6;
 	if(value > 20) {
 		P2OUT |= SEL2;
-		TA1CCR2 = 0;
-		TA1CCR2 = (CYCLE * (2*value - 42)) / 42;
+		value = CYCLE * (2*value - 42);
+		value /= 42;
 	}
 	else {
 		P2OUT &= ~SEL2;
-		TA1CCR2 = 0;
-		TA1CCR2 = (CYCLE * (40 - 2*value)) / 40;
+		value = CYCLE * (40 - 2*value);
+		value /= 40;
 	}
+	TA1CCR2= value;
 }
 
 // Initialize TimerA
