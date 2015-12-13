@@ -19,7 +19,7 @@
 #define AD_CH INCH_5
 
 // Global variables
-int samples[2];
+unsigned int samples[2];
 
 // Prototypes
 void ad_config();
@@ -39,7 +39,7 @@ int main() {
 
 	while(1) {
 		// Set block start address
-		ADC10SA = (int)&samples[0];
+		ADC10SA = (unsigned int)&samples[0];
 		// Start conversion
 		ADC10CTL0 |= ADC10SC + ENC;
 		_BIS_SR(LPM0_bits+GIE);
@@ -59,8 +59,8 @@ void ADCInt(void) {
 // Send ADC values via UART
 void send_data() {
 
-	volatile char x = 0xFF & (samples[0] >> 2);
-	volatile char y = 0xFF & (samples[1] >> 2);
+	volatile unsigned char x = 0xFF & (samples[0] >> 2);
+	volatile unsigned char y = 0xFF & (samples[1] >> 2);
 //	P1OUT ^= GLED + RLED;
 	while (!(IFG2 & UCA0TXIFG));
 	UCA0TXBUF = x & 0xFE;
