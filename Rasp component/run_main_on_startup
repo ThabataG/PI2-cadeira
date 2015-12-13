@@ -1,0 +1,6 @@
+#!/bin/sh
+#
+# Running PI2 project at startup.
+# This script must be placed at /etc/init.d/ and the project root must be placed in home.
+#
+python3 main.py

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
   Universidade de Brasília - Campus Gama
   Disciplina: Projeto Integrador II
