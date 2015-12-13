@@ -27,7 +27,7 @@ class Connect(object):
 				 	print("Valid motor serial connection")
 			else:
 				motorConnected = False
-#				print("No serial ports found")
+				#print("No serial ports found")
 				obj.port = 0
 
 	# Search serial ports until find and make a valid joystick serial port connection
@@ -58,7 +58,7 @@ class Connect(object):
 	# Search for an opened serial port between [0,maxPortNumber] and open it
 	# Return False if no ports where found and True otherwise
 	@staticmethod
-	def searchSerialPort(obj, bypassPort=2, canWrite=False, maxPortNumber=1, serialPrefix="/dev/ttyACM"):
+	def searchSerialPort(obj, bypassPort=10, canWrite=False, maxPortNumber=3, serialPrefix="/dev/ttyACM"):
 		# Reset obj.port if it is greater than maxPortNumber
 		if obj.port > maxPortNumber:
 			obj.port = 0
