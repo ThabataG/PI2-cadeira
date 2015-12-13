@@ -30,9 +30,12 @@ class Motor(threading.Thread):
 		Globals.lock.acquire()
 		writeWithSuccess = True
 		if self.x != Globals.coordinates['x'] or self.y != Globals.coordinates['y']:
-			transformXYtoM(Globals.coordinates)
-			print(str(self.leftMotor) + ',' + str(self.rightMotor))
-			writeWithSuccess = Connect.write(self.serial,[self.rightMotor,self.leftMotor])
+			self.x = Globals.coordinates['x']
+			self.y = Globals.coordinates['y']
+			#coordinates = Globals.coordinates
+			#self.transformXYtoM(coordinates)
+			print(str(self.x) + ',' + str(self.y))
+			writeWithSuccess = Connect.write(self.serial,[self.x,self.y])
 		else:
 			Globals.lock.wait()
 			logging.info("Coordinates' data not changed")
@@ -40,5 +43,5 @@ class Motor(threading.Thread):
 		return writeWithSuccess
 
 	def transformXYtoM(self, coordinates):
-		rightMotor = x
-		leftMotor = y
+		self.rightMotor = coordinates['x']
+		self.leftMotor = coordinates['y']
