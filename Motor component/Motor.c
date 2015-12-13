@@ -108,25 +108,33 @@ void update() {
 
 // Update right motor
 void update_left(unsigned char value) {
-	if(value > 127) {
+	// Proccessing value in order to reduce sensitivity (dividing resolution by 6)
+	value /= 6;
+	if(value > 20) {
 		P2OUT |= SEL1;
-		TA1CCR1 = (CYCLE * (2*(long long)value - 257)) / 252;
+		TA1CCR1 = 0;
+		TA1CCR1 = (CYCLE * (2*value - 42)) / 42;
 	}
 	else {
 		P2OUT &= ~SEL1;
-		TA1CCR1 = (CYCLE * (255 - 2*(long long)value)) / 252;
+		TA1CCR1 = 0;
+		TA1CCR1 = (CYCLE * (40 - 2*value)) / 40;
 	}
 }
 
 // Update left motor
 void update_right(unsigned char value) {
-	if(value > 126) {
+	// Proccessing value in order to reduce sensitivity (dividing resolution by 6)
+	value /= 6;
+	if(value > 20) {
 		P2OUT |= SEL2;
-		TA1CCR2 = (CYCLE * (2*(long long)value - 255)) / 252;
+		TA1CCR2 = 0;
+		TA1CCR2 = (CYCLE * (2*value - 42)) / 42;
 	}
 	else {
 		P2OUT &= ~SEL2;
-		TA1CCR2 = (CYCLE * (253 - 2*(long long)value)) / 252;
+		TA1CCR2 = 0;
+		TA1CCR2 = (CYCLE * (40 - 2*value)) / 40;
 	}
 }
 
