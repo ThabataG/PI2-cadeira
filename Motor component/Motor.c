@@ -43,12 +43,12 @@ int main() {
 	timerA_config();
 	uart_config();
 	port1_config();
-    rxbuf[0] = rxbuf[1] = 0;
+	rxbuf[0] = rxbuf[1] = 0;
 	
 	while(1) {
 		// Blink leds (swaping their states)
 		P1OUT ^= RLED + GLED;
-        
+
 		// Enable interruption via TimerA
 		//TA1CTL |= TAIE;
 		//_BIS_SR(LPM0_bits+GIE);
@@ -56,13 +56,13 @@ int main() {
 		/*************************************************
 		 Receive data and update PWM and selectors values
 		*************************************************/
-        // Enable interruption via UART RX
+		// Enable interruption via UART RX
 		IE2 |= UCA0RXIE;
 		// Receive data and update globals
 		_BIS_SR(LPM0_bits+GIE);
 		_BIS_SR(LPM0_bits+GIE);
 		// Update pwm duty cycles
-        update();
+		update();
 		// Disable interruption via UART RX
 		IE2 &= ~UCA0RXIE;
 	}
@@ -85,25 +85,25 @@ void TIMERAInt(void) {
 void USCI0RXInt(void) __attribute__((interrupt(USCIAB0RX_VECTOR)));
 void USCI0RXInt(void) {
 	// Update variable 'rxbuf' saving the last received byte
-    if(!rxbuf[0] && !rxbuf[1])
-        rxbuf[0] = UCA0RXBUF;
-    else
-        rxbuf[1] = UCA0RXBUF;
+	if(!rxbuf[0] && !rxbuf[1])
+		rxbuf[0] = UCA0RXBUF;
+	else
+		rxbuf[1] = UCA0RXBUF;
 	// Exit Low Power Mode 0
 	LPM0_EXIT;
 }
 
 // Update motors duty cycle
 void update() {
-    if(rxbuf[0] & 1) {
-        update_right(rxbuf[1]);
-        update_left(rxbuf[0]);
-    }
-    else {
-        update_right(rxbuf[0]);
-        update_left(rxbuf[1]);
-    }
-    rxbuf[0] = rxbuf[1] = 0;
+	if(rxbuf[0] & 1) {
+		update_right(rxbuf[1]);
+		update_left(rxbuf[0]);
+	}
+	else {
+		update_right(rxbuf[0]);
+		update_left(rxbuf[1]);
+	}
+	rxbuf[0] = rxbuf[1] = 0;
 }
 
 // Update right motor
